@@ -27,7 +27,7 @@ jobs:
       # Runs a set of commands using the runners shell
       - uses: montudor/action-zip@v0.1.1
         with:
-          args: zip -r -j main.zip ./dist/*
+          args: cd ./dist && zip -r ../main.zip *
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
