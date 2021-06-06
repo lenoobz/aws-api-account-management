@@ -20,6 +20,9 @@ const getMongoClient = async (): Promise<MongoClient> => {
     clientOptions.maxIdleTimeMS = mongo.maxIdleTimeMS;
   }
 
+  clientOptions.useNewUrlParser = true;
+  clientOptions.useUnifiedTopology = true;
+
   return await connect(cxnString, clientOptions);
 };
 

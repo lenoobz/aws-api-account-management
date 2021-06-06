@@ -29,4 +29,23 @@ export class AccountService {
       );
     }
   }
+
+  async getAccountsByUserId(userId: string): Promise<AccountEntity[]> {
+    console.log('get accounts by user id', userId);
+
+    try {
+      return await this.accountRepo.searchAccounts({ createdBy: userId });
+    } catch (error) {
+      console.error('get accounts by user id', error.message);
+
+      if (error instanceof AccountServiceError) {
+        throw error;
+      }
+      throw new AccountServiceError(
+        error.message,
+        ErrorCodes.MONGO_SEARCH_ACCOUNTS_FAILED,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
 }

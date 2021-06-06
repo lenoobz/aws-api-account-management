@@ -6,7 +6,7 @@ import { AccountMongoError } from '../../../../errors/AccountMongoError';
 import { AccountEntity } from '../../../../types/entities/account.entity';
 import { ErrorCodes, ErrorMessages } from '../../../../types/enums/errorCodes.enum';
 import { IAccountRepo } from '../../../../types/repositories/IAccountRepo';
-import { AccountModel } from '../models/account.model';
+import { AccountModel } from '../../../../types/models/account.model';
 import { getClientDb } from './mongo.helper';
 
 export class AccountMongo implements IAccountRepo {
@@ -25,9 +25,10 @@ export class AccountMongo implements IAccountRepo {
 
       const db = await getClientDb(AppConf.mongo.dbName);
       return await db
-        .collection(colName)
-        .find({ ...query }, { projection })
-        .sort(sortBy)
+        .collection<AccountEntity>(colName)
+        .find({ ...query })
+        .project(projection ?? {})
+        .sort(sortBy ?? {})
         .toArray();
     } catch (error) {
       console.error('search accounts failed', error.message);

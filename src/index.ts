@@ -12,12 +12,15 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
   const accountMongo = new AccountMongo();
   const accountService = new AccountService(accountMongo);
 
-  let requestJSON = JSON.parse(event.body);
-
   try {
     switch (event.routeKey) {
       case 'POST /v1/account':
-        body = await accountService.addAccount(requestJSON);
+        const accountJSON = JSON.parse(event.body);
+        body = await accountService.addAccount(accountJSON);
+        break;
+      case 'GET /v1/accounts/{userId}':
+        const userId = event.pathParameters.userId;
+        body = await accountService.getAccountsByUserId(userId);
         break;
       default:
         throw new Error(`Unsupported route: "${event.routeKey}"`);
