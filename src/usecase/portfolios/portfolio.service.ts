@@ -49,17 +49,17 @@ export class PortfolioService {
     }
   }
 
-  async getPortfoliosByUserId(userId: string): Promise<PortfolioEntity[]> {
-    console.log('get portfolios by user id', userId);
+  async getPortfoliosByAccountId(accountId: string): Promise<PortfolioEntity[]> {
+    console.log('get portfolios by account id', accountId);
 
     try {
       return await this.portfolioRepo.searchPortfolios(
-        { createdBy: userId, deleted: false, enabled: true },
-        { enabled: 0, deleted: 0, createdAt: 0 },
+        { accountId: accountId, deleted: false, enabled: true },
+        { _id: 0, enabled: 0, deleted: 0, createdAt: 0 },
         { updatedAt: 1 }
       );
     } catch (error) {
-      console.error('get portfolios by user id', error.message);
+      console.error('get portfolios by account id', error.message);
 
       if (error instanceof PortfolioServiceError) {
         throw error;

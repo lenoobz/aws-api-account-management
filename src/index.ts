@@ -11,7 +11,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
     'Content-Type': 'application/json'
   };
 
-  let userId;
+  let userId, accountId;
   const accountMongo = new AccountMongo();
   const accountService = new AccountService(accountMongo);
 
@@ -40,9 +40,9 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
         const updatePortfolio = JSON.parse(event.body);
         body = await portfolioService.updatePortfolio(updatePortfolio);
         break;
-      case 'GET /v1/portfolios/{userId}':
-        userId = event.pathParameters.userId;
-        body = await portfolioService.getPortfoliosByUserId(userId);
+      case 'GET /v1/portfolios/{accountId}':
+        accountId = event.pathParameters.accountId;
+        body = await portfolioService.getPortfoliosByAccountId(accountId);
         break;
       default:
         throw new Error(`Unsupported route: "${event.routeKey}"`);

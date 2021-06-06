@@ -33,7 +33,7 @@ export class PortfolioMongo implements IPortfolioRepo {
 
       return portfolios.map<PortfolioEntity>((portfolio) => {
         const { _id, ...rest } = portfolio;
-        return { ...rest, id: _id.toString() };
+        return { ...rest };
       });
     } catch (error) {
       console.error('search accounts failed', error.message);
@@ -73,11 +73,7 @@ export class PortfolioMongo implements IPortfolioRepo {
       };
       const result = await db.collection<PortfolioModel>(colName).insertOne(newPortfolio);
 
-      const insertedId = result.insertedId;
-      return {
-        ...portfolio,
-        id: insertedId.toString()
-      };
+      return portfolio;
     } catch (error) {
       console.error('create portfolio failed', error.message);
 
@@ -107,12 +103,12 @@ export class PortfolioMongo implements IPortfolioRepo {
 
       const db = await getClientDb(AppConf.mongo.dbName);
 
-      const { id, ...rest } = portfolio;
+      const { accountId } = portfolio;
       const updateAccount: PortfolioModel = {
-        ...rest,
+        ...portfolio,
         updatedAt: new Date()
       };
-      await db.collection<PortfolioModel>(colName).updateOne({ _id: new ObjectId(id) }, { $set: updateAccount });
+      await db.collection<PortfolioModel>(colName).updateOne({ accountId: accountId }, { $set: updateAccount });
 
       return portfolio;
     } catch (error) {
