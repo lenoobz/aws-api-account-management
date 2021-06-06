@@ -31,7 +31,8 @@ export const AppConf: AppConfig = {
     dbName: 'povi_dev',
     schemaVersion: '1',
     colNames: {
-      accounts: 'accounts'
+      accounts: 'accounts',
+      portfolios: 'portfolios'
     }
   }
 };
