@@ -1,6 +1,7 @@
 export type PortfolioEntity = {
-  id: string;
-  positions: PositionInfo;
+  id?: string;
+  createdBy: string;
+  positions?: PositionInfo;
 };
 
 export type PositionInfo = {

@@ -108,7 +108,7 @@ export class AccountMongo implements IAccountRepo {
       const db = await getClientDb(AppConf.mongo.dbName);
 
       const { id, ...rest } = account;
-      const updateAccount: AccountEntity = {
+      const updateAccount: AccountModel = {
         ...rest,
         updatedAt: new Date()
       };

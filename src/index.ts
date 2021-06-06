@@ -1,6 +1,8 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyHandlerV2 } from 'aws-lambda';
 import { AccountMongo } from './infra/repositories/mongodb/repos/account.mongo';
+import { PortfolioMongo } from './infra/repositories/mongodb/repos/portfolio.mongo';
 import { AccountService } from './usecase/accounts/account.service';
+import { PortfolioService } from './usecase/portfolios/portfolio.service';
 
 export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEventV2) => {
   let body;
@@ -9,8 +11,12 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
     'Content-Type': 'application/json'
   };
 
+  let userId;
   const accountMongo = new AccountMongo();
   const accountService = new AccountService(accountMongo);
+
+  const portfolioMongo = new PortfolioMongo();
+  const portfolioService = new PortfolioService(portfolioMongo);
 
   try {
     switch (event.routeKey) {
@@ -23,8 +29,20 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
         body = await accountService.updateAccount(updateAccount);
         break;
       case 'GET /v1/accounts/{userId}':
-        const userId = event.pathParameters.userId;
+        userId = event.pathParameters.userId;
         body = await accountService.getAccountsByUserId(userId);
+        break;
+      case 'POST /v1/portfolio':
+        const newPortfolio = JSON.parse(event.body);
+        body = await portfolioService.addPortfolio(newPortfolio);
+        break;
+      case 'PUT /v1/portfolio':
+        const updatePortfolio = JSON.parse(event.body);
+        body = await portfolioService.updatePortfolio(updatePortfolio);
+        break;
+      case 'GET /v1/portfolios/{userId}':
+        userId = event.pathParameters.userId;
+        body = await portfolioService.getPortfoliosByUserId(userId);
         break;
       default:
         throw new Error(`Unsupported route: "${event.routeKey}"`);

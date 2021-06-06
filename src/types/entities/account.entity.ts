@@ -3,8 +3,4 @@ export type AccountEntity = {
   name: string;
   desc?: string;
   createdBy: string;
-  enabled?: boolean;
-  deleted?: boolean;
-  createdAt?: Date;
-  updatedAt?: Date;
 };

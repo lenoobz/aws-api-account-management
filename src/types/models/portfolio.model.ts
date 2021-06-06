@@ -1,10 +1,10 @@
 import { ObjectId } from 'bson';
-import { AccountEntity } from '../entities/account.entity';
+import { PortfolioEntity } from '../entities/portfolio.entity';
 
-export type AccountModel = {
+export type PortfolioModel = {
   _id?: ObjectId;
   enabled?: boolean;
   deleted?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
-} & AccountEntity;
+} & PortfolioEntity;
