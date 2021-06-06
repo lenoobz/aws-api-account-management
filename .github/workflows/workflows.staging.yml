@@ -27,6 +27,8 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Install zip
         uses: montudor/action-zip@v1
+
+      - name: Zip output
         run: cd ./dist && zip -qq -r ../main.zip .
 
       - name: Configure AWS credentials
