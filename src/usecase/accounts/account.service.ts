@@ -66,8 +66,8 @@ export class AccountService {
     try {
       return await this.accountRepo.searchAccounts(
         { createdBy: userId, deleted: false, enabled: true },
-        { enabled: 0, deleted: 0, createdAt: 0 },
-        { updatedAt: 1 }
+        { enabled: 0, deleted: 0, updatedAt: 0 },
+        { createdAt: 1 }
       );
     } catch (error) {
       console.error('get accounts by user id', error.message);

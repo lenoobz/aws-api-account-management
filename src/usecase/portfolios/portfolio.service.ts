@@ -77,8 +77,8 @@ export class PortfolioService {
     try {
       return await this.portfolioRepo.searchPortfolios(
         { accountId: accountId, deleted: false, enabled: true },
-        { _id: 0, enabled: 0, deleted: 0, createdAt: 0 },
-        { updatedAt: 1 }
+        { _id: 0, enabled: 0, deleted: 0, updatedAt: 0 },
+        { createdAt: 1 }
       );
     } catch (error) {
       console.error('get portfolios by account id', error.message);
