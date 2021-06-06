@@ -1,6 +1,6 @@
-import { APIGatewayProxyEventV2, APIGatewayProxyResult } from 'aws-lambda';
+import { APIGatewayProxyEventV2, APIGatewayProxyHandlerV2 } from 'aws-lambda';
 
-export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResult> => {
+export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEventV2) => {
   let body;
   let statusCode = 200;
   const headers = {
@@ -8,6 +8,7 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
   };
 
   console.log('[DEBUG] event.routeKey', event.routeKey);
+  console.log('[DEBUG] event', event);
 
   try {
     switch (event.routeKey) {
