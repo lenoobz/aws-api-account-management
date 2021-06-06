@@ -31,6 +31,9 @@ jobs:
       - name: Zip output
         run: cd ./dist && zip -qq -r ../main.zip .
 
+      - name: Zip node_module
+        run: cd .. && zip -qq -r ./main.zip node_modules
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
