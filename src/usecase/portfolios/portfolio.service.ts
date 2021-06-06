@@ -1,7 +1,7 @@
 import { StatusCodes } from 'http-status-codes';
 import { PortfolioServiceError } from '../../errors/PortfolioServiceError';
 import { PortfolioEntity } from '../../types/entities/portfolio.entity';
-import { ErrorCodes } from '../../types/enums/errorCodes.enum';
+import { ErrorCodes, ErrorMessages } from '../../types/enums/errorCodes.enum';
 import { IPortfolioRepo } from '../../types/repositories/IPortfolioRepo';
 
 export class PortfolioService {
@@ -15,6 +15,17 @@ export class PortfolioService {
     console.log('add portfolio', portfolioReq);
 
     try {
+      const { accountId } = portfolioReq;
+      const isExisting = await this.portfolioRepo.isPortfolioExisted(accountId);
+
+      if (isExisting) {
+        throw new PortfolioServiceError(
+          ErrorMessages.SERVICE_PORTFOLIO_EXISTED,
+          ErrorCodes.SERVICE_PORTFOLIO_EXISTED,
+          StatusCodes.CONFLICT
+        );
+      }
+
       return await this.portfolioRepo.createPortfolio(portfolioReq);
     } catch (error) {
       console.error('add portfolio failed', error.message);
@@ -24,7 +35,7 @@ export class PortfolioService {
       }
       throw new PortfolioServiceError(
         error.message,
-        ErrorCodes.MONGO_CREATE_PORTFOLIO_FAILED,
+        ErrorCodes.SERVICE_CREATE_PORTFOLIO_FAILED,
         StatusCodes.INTERNAL_SERVER_ERROR
       );
     }
@@ -34,6 +45,17 @@ export class PortfolioService {
     console.log('update portfolio', portfolioReq);
 
     try {
+      const { accountId } = portfolioReq;
+      const isExisting = await this.portfolioRepo.isPortfolioExisted(accountId);
+
+      if (!isExisting) {
+        throw new PortfolioServiceError(
+          ErrorMessages.SERVICE_PORTFOLIO_NOT_EXISTED,
+          ErrorCodes.SERVICE_PORTFOLIO_NOT_EXISTED,
+          StatusCodes.CONFLICT
+        );
+      }
+
       return await this.portfolioRepo.updatePortfolio(portfolioReq);
     } catch (error) {
       console.error('update portfolio failed', error.message);
@@ -43,7 +65,7 @@ export class PortfolioService {
       }
       throw new PortfolioServiceError(
         error.message,
-        ErrorCodes.MONGO_UPDATE_PORTFOLIO_FAILED,
+        ErrorCodes.SERVICE_UPDATE_PORTFOLIO_FAILED,
         StatusCodes.INTERNAL_SERVER_ERROR
       );
     }
@@ -66,7 +88,7 @@ export class PortfolioService {
       }
       throw new PortfolioServiceError(
         error.message,
-        ErrorCodes.MONGO_SEARCH_PORTFOLIOS_FAILED,
+        ErrorCodes.SERVICE_SEARCH_PORTFOLIOS_FAILED,
         StatusCodes.INTERNAL_SERVER_ERROR
       );
     }

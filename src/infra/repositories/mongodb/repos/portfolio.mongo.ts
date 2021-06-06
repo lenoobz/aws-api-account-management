@@ -10,6 +10,42 @@ import { IPortfolioRepo } from '../../../../types/repositories/IPortfolioRepo';
 import { getClientDb } from './mongo.helper';
 
 export class PortfolioMongo implements IPortfolioRepo {
+  async isPortfolioExisted(accountId: string): Promise<boolean> {
+    console.log('check is portfolio existed', accountId);
+
+    try {
+      const colName = AppConf.mongo.colNames[AppConsts.PORTFOLIOS_COLLECTION];
+      if (!colName) {
+        throw new PortfolioMongoError(
+          ErrorMessages.COLLECTION_NOT_FOUND,
+          ErrorCodes.COLLECTION_NOT_FOUND,
+          StatusCodes.INTERNAL_SERVER_ERROR
+        );
+      }
+
+      const db = await getClientDb(AppConf.mongo.dbName);
+      const count = await db
+        .collection<PortfolioModel>(colName)
+        .find({ accountId })
+        .project({ _id: 1 })
+        .limit(1)
+        .count();
+
+      return count > 0;
+    } catch (error) {
+      console.error('check is portfolio existed failed', error.message);
+
+      if (error instanceof PortfolioMongoError) {
+        throw error;
+      }
+      throw new PortfolioMongoError(
+        error.message,
+        ErrorCodes.MONGO_CHECK_PORTFOLIO_EXISTED_FAILED,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
   async searchPortfolios(query: any, projection?: any, sortBy?: any): Promise<PortfolioEntity[]> {
     console.log('search portfolios', query);
 

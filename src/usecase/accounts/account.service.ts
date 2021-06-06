@@ -24,7 +24,7 @@ export class AccountService {
       }
       throw new AccountServiceError(
         error.message,
-        ErrorCodes.MONGO_SEARCH_ACCOUNTS_FAILED,
+        ErrorCodes.SERVICE_CREATE_ACCOUNT_FAILED,
         StatusCodes.INTERNAL_SERVER_ERROR
       );
     }
@@ -43,7 +43,7 @@ export class AccountService {
       }
       throw new AccountServiceError(
         error.message,
-        ErrorCodes.MONGO_UPDATE_ACCOUNT_FAILED,
+        ErrorCodes.SERVICE_UPDATE_ACCOUNT_FAILED,
         StatusCodes.INTERNAL_SERVER_ERROR
       );
     }
@@ -66,7 +66,7 @@ export class AccountService {
       }
       throw new AccountServiceError(
         error.message,
-        ErrorCodes.MONGO_SEARCH_ACCOUNTS_FAILED,
+        ErrorCodes.SERVICE_SEARCH_ACCOUNTS_FAILED,
         StatusCodes.INTERNAL_SERVER_ERROR
       );
     }
