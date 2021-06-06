@@ -1,0 +1,11 @@
+export enum ErrorCodes {
+  INTERNAL_SERVER_ERROR = 'API-PM-500',
+  COLLECTION_NOT_FOUND = 'API-PM-1',
+  MONGO_SEARCH_ACCOUNTS_FAILED = 'API-PM-2',
+  MONGO_CREATE_ACCOUNT_FAILED = 'API-PM-3',
+  MONGO_UPDATE_ACCOUNT_FAILED = 'API-PM-4'
+}
+
+export enum ErrorMessages {
+  COLLECTION_NOT_FOUND = 'collection not found'
+}

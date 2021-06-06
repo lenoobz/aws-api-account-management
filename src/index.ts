@@ -1,4 +1,6 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyHandlerV2 } from 'aws-lambda';
+import { AccountMongo } from './infra/repositories/mongodb/repos/account.mongo';
+import { AccountService } from './usecase/accounts/account.service';
 
 export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEventV2) => {
   let body;
@@ -7,23 +9,15 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
     'Content-Type': 'application/json'
   };
 
-  console.log('[DEBUG] event.routeKey', event.routeKey);
-  console.log('[DEBUG] event', event);
+  const accountMongo = new AccountMongo();
+  const accountService = new AccountService(accountMongo);
+
+  let requestJSON = JSON.parse(event.body);
 
   try {
     switch (event.routeKey) {
-      case 'DELETE /v1/portfolio/{id}':
-        body = { message: `DELETE portfolio ${event.pathParameters.id}` };
-        break;
-      case 'GET /v1/portfolio/{id}':
-        body = { message: `GET portfolio ${event.pathParameters.id}` };
-        break;
-      case 'GET /v1/portfolios':
-        body = body = { message: `GET all portfolios` };
-        break;
-      case 'PUT /v1/portfolios':
-        let requestJSON = JSON.parse(event.body);
-        body = { message: `PUT portfolios`, request: requestJSON };
+      case 'POST /v1/account':
+        body = await accountService.addAccount(requestJSON);
         break;
       default:
         throw new Error(`Unsupported route: "${event.routeKey}"`);
