@@ -24,12 +24,17 @@ export class AccountMongo implements IAccountRepo {
       }
 
       const db = await getClientDb(AppConf.mongo.dbName);
-      return await db
-        .collection<AccountEntity>(colName)
+      const accounts = await db
+        .collection<AccountModel>(colName)
         .find({ ...query })
         .project(projection ?? {})
         .sort(sortBy ?? {})
         .toArray();
+
+      return accounts.map<AccountEntity>((account) => {
+        const { _id, ...rest } = account;
+        return { ...rest, id: _id.toString() };
+      });
     } catch (error) {
       console.error('search accounts failed', error.message);
 

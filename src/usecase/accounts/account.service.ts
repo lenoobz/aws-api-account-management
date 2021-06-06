@@ -34,7 +34,11 @@ export class AccountService {
     console.log('get accounts by user id', userId);
 
     try {
-      return await this.accountRepo.searchAccounts({ createdBy: userId });
+      return await this.accountRepo.searchAccounts(
+        { createdBy: userId, deleted: false, enabled: true },
+        { enabled: 0, deleted: 0, createdAt: 0 },
+        { updatedAt: 1 }
+      );
     } catch (error) {
       console.error('get accounts by user id', error.message);
 
