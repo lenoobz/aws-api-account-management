@@ -12,16 +12,16 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
 
   try {
     switch (event.routeKey) {
-      case 'DELETE /portfolio/{id}':
+      case 'DELETE /v1/portfolio/{id}':
         body = { message: `DELETE portfolio ${event.pathParameters.id}` };
         break;
-      case 'GET /portfolio/{id}':
+      case 'GET /v1/portfolio/{id}':
         body = { message: `GET portfolio ${event.pathParameters.id}` };
         break;
-      case 'GET /portfolios':
+      case 'GET /v1/portfolios':
         body = body = { message: `GET all portfolios` };
         break;
-      case 'PUT /portfolios':
+      case 'PUT /v1/portfolios':
         let requestJSON = JSON.parse(event.body);
         body = { message: `PUT portfolios`, request: requestJSON };
         break;
