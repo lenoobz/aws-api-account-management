@@ -10,6 +10,41 @@ import { AccountModel } from '../../../../types/models/account.model';
 import { getClientDb } from './mongo.helper';
 
 export class AccountMongo implements IAccountRepo {
+  async isAccountExisted(id: string): Promise<boolean> {
+    console.log('check is account existed', id);
+
+    try {
+      const colName = AppConf.mongo.colNames[AppConsts.ACCOUNTS_COLLECTION];
+      if (!colName) {
+        throw new AccountMongoError(
+          ErrorMessages.COLLECTION_NOT_FOUND,
+          ErrorCodes.COLLECTION_NOT_FOUND,
+          StatusCodes.INTERNAL_SERVER_ERROR
+        );
+      }
+
+      const db = await getClientDb(AppConf.mongo.dbName);
+      const count = await db
+        .collection<AccountModel>(colName)
+        .find({ _id: new ObjectId(id) })
+        .project({ _id: 1 })
+        .limit(1)
+        .count();
+
+      return count > 0;
+    } catch (error) {
+      console.error('check is account existed failed', error.message);
+
+      if (error instanceof AccountMongoError) {
+        throw error;
+      }
+      throw new AccountMongoError(
+        error.message,
+        ErrorCodes.MONGO_CHECK_ACCOUNT_EXISTED_FAILED,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
   async searchAccounts(query: any, projection?: any, sortBy?: any): Promise<AccountEntity[]> {
     console.log('search accounts', query);
 

@@ -1,7 +1,7 @@
 import { StatusCodes } from 'http-status-codes';
 import { AccountServiceError } from '../../errors/AccountServiceError';
 import { AccountEntity } from '../../types/entities/account.entity';
-import { ErrorCodes } from '../../types/enums/errorCodes.enum';
+import { ErrorCodes, ErrorMessages } from '../../types/enums/errorCodes.enum';
 import { IAccountRepo } from '../../types/repositories/IAccountRepo';
 
 export class AccountService {
@@ -34,6 +34,17 @@ export class AccountService {
     console.log('update account', accountReq);
 
     try {
+      const { id } = accountReq;
+      const isExisting = await this.accountRepo.isAccountExisted(id);
+
+      if (!isExisting) {
+        throw new AccountServiceError(
+          ErrorMessages.SERVICE_ACCOUNT_NOT_EXISTED,
+          ErrorCodes.SERVICE_ACCOUNT_NOT_EXISTED,
+          StatusCodes.CONFLICT
+        );
+      }
+
       return await this.accountRepo.updateAccount(accountReq);
     } catch (error) {
       console.error('update account failed', error.message);
