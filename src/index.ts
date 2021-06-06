@@ -15,8 +15,12 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
   try {
     switch (event.routeKey) {
       case 'POST /v1/account':
-        const accountJSON = JSON.parse(event.body);
-        body = await accountService.addAccount(accountJSON);
+        const newAccount = JSON.parse(event.body);
+        body = await accountService.addAccount(newAccount);
+        break;
+      case 'PUT /v1/account':
+        const updateAccount = JSON.parse(event.body);
+        body = await accountService.updateAccount(updateAccount);
         break;
       case 'GET /v1/accounts/{userId}':
         const userId = event.pathParameters.userId;

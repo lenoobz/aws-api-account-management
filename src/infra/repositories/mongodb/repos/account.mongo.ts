@@ -92,7 +92,7 @@ export class AccountMongo implements IAccountRepo {
     }
   }
 
-  async updateAccount(id: string, account: AccountEntity): Promise<AccountEntity> {
+  async updateAccount(account: AccountEntity): Promise<AccountEntity> {
     console.log('update account', account);
 
     try {
@@ -107,8 +107,9 @@ export class AccountMongo implements IAccountRepo {
 
       const db = await getClientDb(AppConf.mongo.dbName);
 
+      const { id, ...rest } = account;
       const updateAccount: AccountEntity = {
-        ...account,
+        ...rest,
         updatedAt: new Date()
       };
       await db.collection<AccountModel>(colName).updateOne({ _id: new ObjectId(id) }, { $set: updateAccount });

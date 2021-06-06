@@ -30,6 +30,25 @@ export class AccountService {
     }
   }
 
+  async updateAccount(accountReq: any): Promise<AccountEntity> {
+    console.log('update account', accountReq);
+
+    try {
+      return await this.accountRepo.updateAccount(accountReq);
+    } catch (error) {
+      console.error('update account failed', error.message);
+
+      if (error instanceof AccountServiceError) {
+        throw error;
+      }
+      throw new AccountServiceError(
+        error.message,
+        ErrorCodes.MONGO_UPDATE_ACCOUNT_FAILED,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
   async getAccountsByUserId(userId: string): Promise<AccountEntity[]> {
     console.log('get accounts by user id', userId);
 
