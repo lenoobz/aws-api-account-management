@@ -7,6 +7,8 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
     'Content-Type': 'application/json'
   };
 
+  console.log('[DEBUG] event.routeKey', event.routeKey);
+
   try {
     switch (event.routeKey) {
       case 'DELETE /portfolio/{id}':
