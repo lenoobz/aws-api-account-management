@@ -11,6 +11,29 @@ export class PortfolioService {
     this.portfolioRepo = portfolioRepo;
   }
 
+  async getPortfoliosByAccountId(accountId: string): Promise<PortfolioEntity[]> {
+    console.log('get portfolios by account id', accountId);
+
+    try {
+      return await this.portfolioRepo.searchPortfolios(
+        { accountId: accountId, deleted: false, enabled: true },
+        { _id: 0, enabled: 0, deleted: 0, updatedAt: 0 },
+        { createdAt: 1 }
+      );
+    } catch (error) {
+      console.error('get portfolios by account id', error.message);
+
+      if (error instanceof PortfolioServiceError) {
+        throw error;
+      }
+      throw new PortfolioServiceError(
+        error.message,
+        ErrorCodes.SERVICE_SEARCH_PORTFOLIOS_FAILED,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
   async addPortfolio(portfolioReq: any): Promise<PortfolioEntity> {
     console.log('add portfolio', portfolioReq);
 
@@ -41,7 +64,28 @@ export class PortfolioService {
     }
   }
 
-  async updatePortfolio(portfolioReq: any): Promise<PortfolioEntity> {
+  async deletePortfolio(portfolioReq: any): Promise<PortfolioEntity[]> {
+    console.log('delete portfolio', portfolioReq);
+
+    try {
+      const { accountId, createdBy } = portfolioReq;
+      await this.addPosition({ accountId, deleted: true });
+      return await this.getPortfoliosByAccountId(createdBy);
+    } catch (error) {
+      console.error('delete portfolio failed', error.message);
+
+      if (error instanceof PortfolioServiceError) {
+        throw error;
+      }
+      throw new PortfolioServiceError(
+        error.message,
+        ErrorCodes.SERVICE_DELETE_PORTFOLIO_FAILED,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  async addPosition(portfolioReq: any): Promise<PortfolioEntity> {
     console.log('update portfolio', portfolioReq);
 
     try {
@@ -71,24 +115,61 @@ export class PortfolioService {
     }
   }
 
-  async getPortfoliosByAccountId(accountId: string): Promise<PortfolioEntity[]> {
-    console.log('get portfolios by account id', accountId);
+  async editPosition(portfolioReq: any): Promise<PortfolioEntity> {
+    console.log('update portfolio', portfolioReq);
 
     try {
-      return await this.portfolioRepo.searchPortfolios(
-        { accountId: accountId, deleted: false, enabled: true },
-        { _id: 0, enabled: 0, deleted: 0, updatedAt: 0 },
-        { createdAt: 1 }
-      );
+      const { accountId } = portfolioReq;
+      const isExisting = await this.portfolioRepo.isPortfolioExisted(accountId);
+
+      if (!isExisting) {
+        throw new PortfolioServiceError(
+          ErrorMessages.SERVICE_PORTFOLIO_NOT_EXISTED,
+          ErrorCodes.SERVICE_PORTFOLIO_NOT_EXISTED,
+          StatusCodes.CONFLICT
+        );
+      }
+
+      return await this.portfolioRepo.updatePortfolio(portfolioReq);
     } catch (error) {
-      console.error('get portfolios by account id', error.message);
+      console.error('update portfolio failed', error.message);
 
       if (error instanceof PortfolioServiceError) {
         throw error;
       }
       throw new PortfolioServiceError(
         error.message,
-        ErrorCodes.SERVICE_SEARCH_PORTFOLIOS_FAILED,
+        ErrorCodes.SERVICE_UPDATE_PORTFOLIO_FAILED,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  async deletePosition(portfolioReq: any): Promise<PortfolioEntity> {
+    console.log('update portfolio', portfolioReq);
+
+    try {
+      const { accountId } = portfolioReq;
+      const isExisting = await this.portfolioRepo.isPortfolioExisted(accountId);
+
+      if (!isExisting) {
+        throw new PortfolioServiceError(
+          ErrorMessages.SERVICE_PORTFOLIO_NOT_EXISTED,
+          ErrorCodes.SERVICE_PORTFOLIO_NOT_EXISTED,
+          StatusCodes.CONFLICT
+        );
+      }
+
+      return await this.portfolioRepo.updatePortfolio(portfolioReq);
+    } catch (error) {
+      console.error('update portfolio failed', error.message);
+
+      if (error instanceof PortfolioServiceError) {
+        throw error;
+      }
+      throw new PortfolioServiceError(
+        error.message,
+        ErrorCodes.SERVICE_UPDATE_PORTFOLIO_FAILED,
         StatusCodes.INTERNAL_SERVER_ERROR
       );
     }

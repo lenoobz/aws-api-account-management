@@ -1,14 +1,26 @@
 import { StatusCodes } from 'http-status-codes';
 import { AccountServiceError } from '../../errors/AccountServiceError';
+import { InvalidParamError } from '../../errors/InvalidParamError';
 import { AccountEntity } from '../../types/entities/account.entity';
 import { ErrorCodes, ErrorMessages } from '../../types/enums/errorCodes.enum';
 import { IAccountRepo } from '../../types/repositories/IAccountRepo';
+import {
+  AddAccountRequestDto,
+  AddAccountRequestScheme,
+  DeleteAccountRequestDto,
+  DeleteAccountRequestScheme,
+  EditAccountRequestDto,
+  EditAccountRequestScheme
+} from '../../types/requests/AccountRequest.dto';
+import { PortfolioService } from '../portfolios/portfolio.service';
 
 export class AccountService {
   accountRepo: IAccountRepo;
+  portfolioService: PortfolioService;
 
-  constructor(accountRepo: IAccountRepo) {
+  constructor(accountRepo: IAccountRepo, portfolioService: PortfolioService) {
     this.accountRepo = accountRepo;
+    this.portfolioService = portfolioService;
   }
 
   async getAccountsByUserId(userId: string): Promise<AccountEntity[]> {
@@ -34,11 +46,21 @@ export class AccountService {
     }
   }
 
-  async addAccount(accountReq: any): Promise<AccountEntity> {
-    console.log('add account', accountReq);
+  async addAccount(addAccountReq: AddAccountRequestDto): Promise<AccountEntity> {
+    const joi = AddAccountRequestScheme.validate(addAccountReq);
+    if (joi.error) {
+      throw new InvalidParamError(joi.error.message, ErrorCodes.SERVICE_CREATE_ACCOUNT_FAILED, StatusCodes.BAD_REQUEST);
+    }
+
+    console.log('add account', addAccountReq);
 
     try {
-      return await this.accountRepo.createAccount(accountReq);
+      const newAccount = await this.accountRepo.createAccount(addAccountReq);
+
+      // go ahead and create a new portfolio associated with the new account
+      this.portfolioService.addPortfolio({ createdBy: newAccount.createdBy, accountId: newAccount.id });
+
+      return newAccount;
     } catch (error) {
       console.error('add account failed', error.message);
 
@@ -53,11 +75,16 @@ export class AccountService {
     }
   }
 
-  async updateAccount(accountReq: any): Promise<AccountEntity> {
-    console.log('update account', accountReq);
+  async updateAccount(editAccountReq: EditAccountRequestDto): Promise<AccountEntity> {
+    const joi = EditAccountRequestScheme.validate(editAccountReq);
+    if (joi.error) {
+      throw new InvalidParamError(joi.error.message, ErrorCodes.SERVICE_UPDATE_ACCOUNT_FAILED, StatusCodes.BAD_REQUEST);
+    }
+
+    console.log('update account', editAccountReq);
 
     try {
-      const { id } = accountReq;
+      const { id, name } = editAccountReq;
       const isExisting = await this.accountRepo.isAccountExisted(id);
 
       if (!isExisting) {
@@ -68,7 +95,8 @@ export class AccountService {
         );
       }
 
-      return await this.accountRepo.updateAccount(accountReq);
+      const editAccount: AccountEntity = { ...editAccountReq, name };
+      return await this.accountRepo.updateAccount(editAccount);
     } catch (error) {
       console.error('update account failed', error.message);
 
@@ -83,12 +111,18 @@ export class AccountService {
     }
   }
 
-  async deleteAccount(accountReq: any): Promise<AccountEntity[]> {
-    console.log('delete account', accountReq);
+  async deleteAccount(deleteAccountReq: DeleteAccountRequestDto): Promise<AccountEntity[]> {
+    const joi = DeleteAccountRequestScheme.validate(deleteAccountReq);
+    if (joi.error) {
+      throw new InvalidParamError(joi.error.message, ErrorCodes.SERVICE_UPDATE_ACCOUNT_FAILED, StatusCodes.BAD_REQUEST);
+    }
+
+    console.log('delete account', deleteAccountReq);
 
     try {
-      const { id, createdBy } = accountReq;
-      await this.updateAccount({ id, deleted: true });
+      const { id, createdBy } = deleteAccountReq;
+      await this.updateAccount({ id, createdBy, deleted: true });
+      await this.portfolioService.deletePortfolio({ accountId: id, createdBy });
       return await this.getAccountsByUserId(createdBy);
     } catch (error) {
       console.error('delete account failed', error.message);

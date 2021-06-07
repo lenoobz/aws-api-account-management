@@ -12,41 +12,42 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
   };
 
   let userId, accountId;
-  const accountMongo = new AccountMongo();
-  const accountService = new AccountService(accountMongo);
-
   const portfolioMongo = new PortfolioMongo();
   const portfolioService = new PortfolioService(portfolioMongo);
 
+  const accountMongo = new AccountMongo();
+  const accountService = new AccountService(accountMongo, portfolioService);
+
   try {
     switch (event.routeKey) {
-      case 'POST /v1/account':
-        const newAccount = JSON.parse(event.body);
-        body = await accountService.addAccount(newAccount);
-        break;
-      case 'PUT /v1/account':
-        const updateAccount = JSON.parse(event.body);
-        body = await accountService.updateAccount(updateAccount);
-        break;
-      case 'DELETE /v1/account':
-        const deleteAccount = JSON.parse(event.body);
-        body = await accountService.deleteAccount(deleteAccount);
-        break;
       case 'GET /v1/accounts/{userId}':
         userId = event.pathParameters.userId;
         body = await accountService.getAccountsByUserId(userId);
         break;
-      case 'POST /v1/portfolio':
-        const newPortfolio = JSON.parse(event.body);
-        body = await portfolioService.addPortfolio(newPortfolio);
+      case 'POST /v1/account':
+        body = await accountService.addAccount(JSON.parse(event.body));
         break;
-      case 'PUT /v1/portfolio':
-        const updatePortfolio = JSON.parse(event.body);
-        body = await portfolioService.updatePortfolio(updatePortfolio);
+      case 'PUT /v1/account':
+        body = await accountService.updateAccount(JSON.parse(event.body));
+        break;
+      case 'DELETE /v1/account':
+        body = await accountService.deleteAccount(JSON.parse(event.body));
         break;
       case 'GET /v1/portfolios/{accountId}':
         accountId = event.pathParameters.accountId;
         body = await portfolioService.getPortfoliosByAccountId(accountId);
+        break;
+      case 'POST /v1/position':
+        const newPosition = JSON.parse(event.body);
+        body = await portfolioService.addPosition(newPosition);
+        break;
+      case 'PUT /v1/position':
+        const editPosition = JSON.parse(event.body);
+        body = await portfolioService.editPosition(editPosition);
+        break;
+      case 'DELETE /v1/position':
+        const deletePosition = JSON.parse(event.body);
+        body = await portfolioService.deletePosition(deletePosition);
         break;
       default:
         throw new Error(`Unsupported route: "${event.routeKey}"`);
