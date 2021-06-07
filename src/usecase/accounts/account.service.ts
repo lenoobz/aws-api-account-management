@@ -87,8 +87,8 @@ export class AccountService {
     console.log('delete account', accountReq);
 
     try {
-      const { createdBy } = accountReq;
-      await this.updateAccount({ ...accountReq, deleted: true });
+      const { id, createdBy } = accountReq;
+      await this.updateAccount({ id, deleted: true });
       return await this.getAccountsByUserId(createdBy);
     } catch (error) {
       console.error('delete account failed', error.message);
