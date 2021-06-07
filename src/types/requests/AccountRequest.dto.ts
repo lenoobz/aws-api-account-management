@@ -21,7 +21,7 @@ export const EditAccountRequestScheme = Joi.object({
   id: Joi.string().required(),
   createdBy: Joi.string().required(),
   name: Joi.string(),
-  deleted: Joi.string()
+  deleted: Joi.boolean()
 });
 
 export type DeleteAccountRequestDto = {
