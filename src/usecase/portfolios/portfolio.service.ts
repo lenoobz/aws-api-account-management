@@ -1,8 +1,17 @@
 import { StatusCodes } from 'http-status-codes';
+import { InvalidParamError } from '../../errors/InvalidParamError';
 import { PortfolioServiceError } from '../../errors/PortfolioServiceError';
 import { PortfolioEntity } from '../../types/entities/portfolio.entity';
 import { ErrorCodes, ErrorMessages } from '../../types/enums/errorCodes.enum';
 import { IPortfolioRepo } from '../../types/repositories/IPortfolioRepo';
+import {
+  AddPortfolioRequestDto,
+  AddPortfolioRequestScheme,
+  EditPortfolioRequestDto,
+  EditPortfolioRequestScheme,
+  DeletePortfolioRequestDto,
+  DeletePortfolioRequestScheme
+} from '../../types/requests/PortfolioRequest.dto';
 
 export class PortfolioService {
   portfolioRepo: IPortfolioRepo;
@@ -34,11 +43,20 @@ export class PortfolioService {
     }
   }
 
-  async addPortfolio(portfolioReq: any): Promise<PortfolioEntity> {
-    console.log('add portfolio', portfolioReq);
+  async addPortfolio(addPortfolioReq: AddPortfolioRequestDto): Promise<PortfolioEntity> {
+    const joi = AddPortfolioRequestScheme.validate(addPortfolioReq);
+    if (joi.error) {
+      throw new InvalidParamError(
+        joi.error.message,
+        ErrorCodes.SERVICE_CREATE_PORTFOLIO_FAILED,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    console.log('add portfolio', addPortfolioReq);
 
     try {
-      const { accountId } = portfolioReq;
+      const { accountId } = addPortfolioReq;
       const isExisting = await this.portfolioRepo.isPortfolioExisted(accountId);
 
       if (isExisting) {
@@ -49,7 +67,7 @@ export class PortfolioService {
         );
       }
 
-      return await this.portfolioRepo.createPortfolio(portfolioReq);
+      return await this.portfolioRepo.createPortfolio(addPortfolioReq);
     } catch (error) {
       console.error('add portfolio failed', error.message);
 
@@ -64,12 +82,60 @@ export class PortfolioService {
     }
   }
 
-  async deletePortfolio(portfolioReq: any): Promise<PortfolioEntity[]> {
-    console.log('delete portfolio', portfolioReq);
+  async updatePortfolio(editPortfolioReq: EditPortfolioRequestDto): Promise<PortfolioEntity> {
+    const joi = EditPortfolioRequestScheme.validate(editPortfolioReq);
+    if (joi.error) {
+      throw new InvalidParamError(
+        joi.error.message,
+        ErrorCodes.SERVICE_UPDATE_PORTFOLIO_FAILED,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    console.log('update portfolio', editPortfolioReq);
 
     try {
-      const { accountId, createdBy } = portfolioReq;
-      await this.addPosition({ accountId, deleted: true });
+      const { accountId } = editPortfolioReq;
+      const isExisting = await this.portfolioRepo.isPortfolioExisted(accountId);
+
+      if (!isExisting) {
+        throw new PortfolioServiceError(
+          ErrorMessages.SERVICE_PORTFOLIO_NOT_EXISTED,
+          ErrorCodes.SERVICE_PORTFOLIO_NOT_EXISTED,
+          StatusCodes.CONFLICT
+        );
+      }
+
+      return await this.portfolioRepo.updatePortfolio(editPortfolioReq);
+    } catch (error) {
+      console.error('update portfolio failed', error.message);
+
+      if (error instanceof PortfolioServiceError) {
+        throw error;
+      }
+      throw new PortfolioServiceError(
+        error.message,
+        ErrorCodes.SERVICE_UPDATE_PORTFOLIO_FAILED,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  async deletePortfolio(deletePortfolioReq: DeletePortfolioRequestDto): Promise<PortfolioEntity[]> {
+    const joi = DeletePortfolioRequestScheme.validate(deletePortfolioReq);
+    if (joi.error) {
+      throw new InvalidParamError(
+        joi.error.message,
+        ErrorCodes.SERVICE_DELETE_PORTFOLIO_FAILED,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    console.log('delete portfolio', deletePortfolioReq);
+
+    try {
+      const { accountId, createdBy } = deletePortfolioReq;
+      await this.updatePortfolio({ accountId, createdBy, deleted: true });
       return await this.getPortfoliosByAccountId(createdBy);
     } catch (error) {
       console.error('delete portfolio failed', error.message);

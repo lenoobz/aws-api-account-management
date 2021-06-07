@@ -38,16 +38,13 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
         body = await portfolioService.getPortfoliosByAccountId(accountId);
         break;
       case 'POST /v1/position':
-        const newPosition = JSON.parse(event.body);
-        body = await portfolioService.addPosition(newPosition);
+        body = await portfolioService.addPosition(JSON.parse(event.body));
         break;
       case 'PUT /v1/position':
-        const editPosition = JSON.parse(event.body);
-        body = await portfolioService.editPosition(editPosition);
+        body = await portfolioService.editPosition(JSON.parse(event.body));
         break;
       case 'DELETE /v1/position':
-        const deletePosition = JSON.parse(event.body);
-        body = await portfolioService.deletePosition(deletePosition);
+        body = await portfolioService.deletePosition(JSON.parse(event.body));
         break;
       default:
         throw new Error(`Unsupported route: "${event.routeKey}"`);
