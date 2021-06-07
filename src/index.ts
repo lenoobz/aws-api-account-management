@@ -28,6 +28,10 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
         const updateAccount = JSON.parse(event.body);
         body = await accountService.updateAccount(updateAccount);
         break;
+      case 'DELETE /v1/account':
+        const deleteAccount = JSON.parse(event.body);
+        body = await accountService.deleteAccount(deleteAccount);
+        break;
       case 'GET /v1/accounts/{userId}':
         userId = event.pathParameters.userId;
         body = await accountService.getAccountsByUserId(userId);

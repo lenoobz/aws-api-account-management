@@ -11,6 +11,29 @@ export class AccountService {
     this.accountRepo = accountRepo;
   }
 
+  async getAccountsByUserId(userId: string): Promise<AccountEntity[]> {
+    console.log('get accounts by user id', userId);
+
+    try {
+      return await this.accountRepo.searchAccounts(
+        { createdBy: userId, deleted: false, enabled: true },
+        { enabled: 0, deleted: 0, updatedAt: 0 },
+        { createdAt: 1 }
+      );
+    } catch (error) {
+      console.error('get accounts by user id', error.message);
+
+      if (error instanceof AccountServiceError) {
+        throw error;
+      }
+      throw new AccountServiceError(
+        error.message,
+        ErrorCodes.SERVICE_SEARCH_ACCOUNTS_FAILED,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
   async addAccount(accountReq: any): Promise<AccountEntity> {
     console.log('add account', accountReq);
 
@@ -60,24 +83,22 @@ export class AccountService {
     }
   }
 
-  async getAccountsByUserId(userId: string): Promise<AccountEntity[]> {
-    console.log('get accounts by user id', userId);
+  async deleteAccount(accountReq: any): Promise<AccountEntity[]> {
+    console.log('delete account', accountReq);
 
     try {
-      return await this.accountRepo.searchAccounts(
-        { createdBy: userId, deleted: false, enabled: true },
-        { enabled: 0, deleted: 0, updatedAt: 0 },
-        { createdAt: 1 }
-      );
+      const { createdBy } = accountReq;
+      await this.updateAccount({ ...accountReq, deleted: true });
+      return await this.getAccountsByUserId(createdBy);
     } catch (error) {
-      console.error('get accounts by user id', error.message);
+      console.error('delete account failed', error.message);
 
       if (error instanceof AccountServiceError) {
         throw error;
       }
       throw new AccountServiceError(
         error.message,
-        ErrorCodes.SERVICE_SEARCH_ACCOUNTS_FAILED,
+        ErrorCodes.SERVICE_DELETE_ACCOUNT_FAILED,
         StatusCodes.INTERNAL_SERVER_ERROR
       );
     }
