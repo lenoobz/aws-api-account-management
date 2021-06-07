@@ -84,7 +84,7 @@ export class AccountService {
     console.log('update account', editAccountReq);
 
     try {
-      const { id, name } = editAccountReq;
+      const { id } = editAccountReq;
       const isExisting = await this.accountRepo.isAccountExisted(id);
 
       if (!isExisting) {
@@ -95,7 +95,7 @@ export class AccountService {
         );
       }
 
-      const editAccount: AccountEntity = { ...editAccountReq, name };
+      const editAccount: AccountEntity = { ...editAccountReq };
       return await this.accountRepo.updateAccount(editAccount);
     } catch (error) {
       console.error('update account failed', error.message);

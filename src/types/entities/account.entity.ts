@@ -3,6 +3,6 @@ export type AccountEntity = {
   desc?: string;
   enabled?: boolean;
   deleted?: boolean;
-  name: string;
+  name?: string;
   createdBy: string;
 };
