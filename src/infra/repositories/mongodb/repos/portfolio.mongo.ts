@@ -26,7 +26,7 @@ export class PortfolioMongo implements IPositionRepo {
       const db = await getClientDb(AppConf.mongo.dbName);
       const count = await db
         .collection<PortfolioModel>(colName)
-        .find({ accountId, createdBy, ticker })
+        .find({ accountId, createdBy, ticker, deleted: false })
         .project({ _id: 1 })
         .limit(1)
         .count();
