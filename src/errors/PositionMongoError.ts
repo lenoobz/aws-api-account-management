@@ -1,10 +1,10 @@
 import { StatusCodes } from 'http-status-codes';
 import { ErrorCodes } from '../types/enums/errorCodes.enum';
 
-export class PortfolioMongoError extends Error {
+export class PositionMongoError extends Error {
   constructor(msg: string, readonly errorCode: ErrorCodes, readonly statusCode: StatusCodes) {
     super(msg);
-    Object.setPrototypeOf(this, PortfolioMongoError.prototype);
+    Object.setPrototypeOf(this, PositionMongoError.prototype);
 
     this.name = this.constructor.name;
     this.errorCode = errorCode;

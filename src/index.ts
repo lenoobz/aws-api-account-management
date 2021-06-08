@@ -2,7 +2,7 @@ import { APIGatewayProxyEventV2, APIGatewayProxyHandlerV2 } from 'aws-lambda';
 import { AccountMongo } from './infra/repositories/mongodb/repos/account.mongo';
 import { PortfolioMongo } from './infra/repositories/mongodb/repos/portfolio.mongo';
 import { AccountService } from './usecase/accounts/account.service';
-import { PortfolioService } from './usecase/portfolios/portfolio.service';
+import { PositionService } from './usecase/positions/position.service';
 
 export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEventV2) => {
   let body;
@@ -13,10 +13,10 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
 
   let userId, accountId;
   const portfolioMongo = new PortfolioMongo();
-  const portfolioService = new PortfolioService(portfolioMongo);
+  const portfolioService = new PositionService(portfolioMongo);
 
   const accountMongo = new AccountMongo();
-  const accountService = new AccountService(accountMongo, portfolioService);
+  const accountService = new AccountService(accountMongo);
 
   try {
     switch (event.routeKey) {
@@ -33,15 +33,15 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
       case 'DELETE /v1/account':
         body = await accountService.deleteAccount(JSON.parse(event.body));
         break;
-      case 'GET /v1/portfolios/{accountId}':
+      case 'GET /v1/positions/{accountId}':
         accountId = event.pathParameters.accountId;
-        body = await portfolioService.getPortfoliosByAccountId(accountId);
+        body = await portfolioService.getPositionsByAccountId(accountId);
         break;
       case 'POST /v1/position':
         body = await portfolioService.addPosition(JSON.parse(event.body));
         break;
       case 'PUT /v1/position':
-        body = await portfolioService.editPosition(JSON.parse(event.body));
+        body = await portfolioService.updatePosition(JSON.parse(event.body));
         break;
       case 'DELETE /v1/position':
         body = await portfolioService.deletePosition(JSON.parse(event.body));

@@ -12,15 +12,12 @@ import {
   EditAccountRequestDto,
   EditAccountRequestScheme
 } from '../../types/requests/AccountRequest.dto';
-import { PortfolioService } from '../portfolios/portfolio.service';
 
 export class AccountService {
   accountRepo: IAccountRepo;
-  portfolioService: PortfolioService;
 
-  constructor(accountRepo: IAccountRepo, portfolioService: PortfolioService) {
+  constructor(accountRepo: IAccountRepo) {
     this.accountRepo = accountRepo;
-    this.portfolioService = portfolioService;
   }
 
   async getAccountsByUserId(userId: string): Promise<AccountEntity[]> {
@@ -55,12 +52,7 @@ export class AccountService {
     console.log('add account', addAccountReq);
 
     try {
-      const newAccount = await this.accountRepo.createAccount(addAccountReq);
-
-      // go ahead and create a new portfolio associated with the new account
-      this.portfolioService.addPortfolio({ createdBy: newAccount.createdBy, accountId: newAccount.id });
-
-      return newAccount;
+      return await this.accountRepo.createAccount(addAccountReq);
     } catch (error) {
       console.error('add account failed', error.message);
 
@@ -122,7 +114,6 @@ export class AccountService {
     try {
       const { id, createdBy } = deleteAccountReq;
       await this.updateAccount({ id, createdBy, deleted: true });
-      await this.portfolioService.deletePortfolio({ accountId: id, createdBy });
       return await this.getAccountsByUserId(createdBy);
     } catch (error) {
       console.error('delete account failed', error.message);

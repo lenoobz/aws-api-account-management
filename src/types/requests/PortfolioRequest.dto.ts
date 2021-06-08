@@ -1,33 +1,43 @@
 import Joi = require('joi');
 
-export type AddPortfolioRequestDto = {
+export type AddPositionRequestDto = {
   accountId: string;
   createdBy: string;
+  ticker: string;
+  shares: number;
 };
 
-export const AddPortfolioRequestScheme = Joi.object({
+export const AddPositionRequestScheme = Joi.object({
   accountId: Joi.string().required(),
-  createdBy: Joi.string().required()
+  createdBy: Joi.string().required(),
+  ticker: Joi.string().required(),
+  shares: Joi.number().required()
 });
 
-export type EditPortfolioRequestDto = {
+export type EditPositionRequestDto = {
   accountId: string;
   createdBy: string;
+  ticker: string;
+  shares?: number;
   deleted?: boolean;
 };
 
-export const EditPortfolioRequestScheme = Joi.object({
+export const EditPositionRequestScheme = Joi.object({
   accountId: Joi.string().required(),
   createdBy: Joi.string().required(),
+  ticker: Joi.string().required(),
+  shares: Joi.number().required(),
   deleted: Joi.boolean()
 });
 
-export type DeletePortfolioRequestDto = {
+export type DeletePositionRequestDto = {
   accountId: string;
   createdBy: string;
+  ticker: string;
 };
 
-export const DeletePortfolioRequestScheme = Joi.object({
+export const DeletePositionRequestScheme = Joi.object({
   accountId: Joi.string().required(),
-  createdBy: Joi.string().required()
+  createdBy: Joi.string().required(),
+  ticker: Joi.string().required()
 });

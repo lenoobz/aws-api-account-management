@@ -1,12 +1,8 @@
-export type PortfolioEntity = {
+export type PositionEntity = {
   accountId: string;
   createdBy: string;
-  positions?: PositionInfo[];
+  ticker: string;
+  shares?: number;
   enabled?: boolean;
   deleted?: boolean;
-};
-
-export type PositionInfo = {
-  ticker: string;
-  value: number;
 };

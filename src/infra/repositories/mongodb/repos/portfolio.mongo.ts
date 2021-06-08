@@ -2,21 +2,21 @@ import { ObjectId } from 'bson';
 import { StatusCodes } from 'http-status-codes';
 import { AppConf } from '../../../../config/app.config';
 import { AppConsts } from '../../../../consts/app.const';
-import { PortfolioMongoError } from '../../../../errors/PortfolioMongoError';
-import { PortfolioEntity } from '../../../../types/entities/portfolio.entity';
+import { PositionMongoError } from '../../../../errors/PositionMongoError';
+import { PositionEntity } from '../../../../types/entities/portfolio.entity';
 import { ErrorCodes, ErrorMessages } from '../../../../types/enums/errorCodes.enum';
 import { PortfolioModel } from '../../../../types/models/portfolio.model';
-import { IPortfolioRepo } from '../../../../types/repositories/IPortfolioRepo';
+import { IPositionRepo } from '../../../../types/repositories/IPositionRepo';
 import { getClientDb } from './mongo.helper';
 
-export class PortfolioMongo implements IPortfolioRepo {
-  async isPortfolioExisted(accountId: string): Promise<boolean> {
-    console.log('check is portfolio existed', accountId);
+export class PortfolioMongo implements IPositionRepo {
+  async isPositionExisted(accountId: string, createdBy: string, ticker: string): Promise<boolean> {
+    console.log('check is position existed', accountId);
 
     try {
       const colName = AppConf.mongo.colNames[AppConsts.PORTFOLIOS_COLLECTION];
       if (!colName) {
-        throw new PortfolioMongoError(
+        throw new PositionMongoError(
           ErrorMessages.COLLECTION_NOT_FOUND,
           ErrorCodes.COLLECTION_NOT_FOUND,
           StatusCodes.INTERNAL_SERVER_ERROR
@@ -26,7 +26,7 @@ export class PortfolioMongo implements IPortfolioRepo {
       const db = await getClientDb(AppConf.mongo.dbName);
       const count = await db
         .collection<PortfolioModel>(colName)
-        .find({ accountId })
+        .find({ accountId, createdBy, ticker })
         .project({ _id: 1 })
         .limit(1)
         .count();
@@ -35,24 +35,24 @@ export class PortfolioMongo implements IPortfolioRepo {
     } catch (error) {
       console.error('check is portfolio existed failed', error.message);
 
-      if (error instanceof PortfolioMongoError) {
+      if (error instanceof PositionMongoError) {
         throw error;
       }
-      throw new PortfolioMongoError(
+      throw new PositionMongoError(
         error.message,
-        ErrorCodes.MONGO_CHECK_PORTFOLIO_EXISTED_FAILED,
+        ErrorCodes.MONGO_CHECK_POSITION_EXISTED_FAILED,
         StatusCodes.INTERNAL_SERVER_ERROR
       );
     }
   }
 
-  async searchPortfolios(query: any, projection?: any, sortBy?: any): Promise<PortfolioEntity[]> {
+  async searchPositions(query: any, projection?: any, sortBy?: any): Promise<PositionEntity[]> {
     console.log('search portfolios', query);
 
     try {
       const colName = AppConf.mongo.colNames[AppConsts.PORTFOLIOS_COLLECTION];
       if (!colName) {
-        throw new PortfolioMongoError(
+        throw new PositionMongoError(
           ErrorMessages.COLLECTION_NOT_FOUND,
           ErrorCodes.COLLECTION_NOT_FOUND,
           StatusCodes.INTERNAL_SERVER_ERROR
@@ -67,31 +67,31 @@ export class PortfolioMongo implements IPortfolioRepo {
         .sort(sortBy ?? {})
         .toArray();
 
-      return portfolios.map<PortfolioEntity>((portfolio) => {
+      return portfolios.map<PositionEntity>((portfolio) => {
         const { _id, ...rest } = portfolio;
         return { ...rest };
       });
     } catch (error) {
       console.error('search accounts failed', error.message);
 
-      if (error instanceof PortfolioMongoError) {
+      if (error instanceof PositionMongoError) {
         throw error;
       }
-      throw new PortfolioMongoError(
+      throw new PositionMongoError(
         error.message,
-        ErrorCodes.MONGO_SEARCH_PORTFOLIOS_FAILED,
+        ErrorCodes.MONGO_SEARCH_POSITIONS_FAILED,
         StatusCodes.INTERNAL_SERVER_ERROR
       );
     }
   }
 
-  async createPortfolio(portfolio: PortfolioEntity): Promise<PortfolioEntity> {
-    console.log('create portfolio', portfolio);
+  async createPosition(position: PositionEntity): Promise<PositionEntity> {
+    console.log('create position', position);
 
     try {
       const colName = AppConf.mongo.colNames[AppConsts.PORTFOLIOS_COLLECTION];
       if (!colName) {
-        throw new PortfolioMongoError(
+        throw new PositionMongoError(
           ErrorMessages.COLLECTION_NOT_FOUND,
           ErrorCodes.COLLECTION_NOT_FOUND,
           StatusCodes.INTERNAL_SERVER_ERROR
@@ -100,37 +100,37 @@ export class PortfolioMongo implements IPortfolioRepo {
 
       const db = await getClientDb(AppConf.mongo.dbName);
 
-      const newPortfolio: PortfolioModel = {
-        ...portfolio,
+      const newPosition: PortfolioModel = {
+        ...position,
         enabled: true,
         deleted: false,
         createdAt: new Date(),
         updatedAt: new Date()
       };
-      const result = await db.collection<PortfolioModel>(colName).insertOne(newPortfolio);
+      const result = await db.collection<PortfolioModel>(colName).insertOne(newPosition);
 
-      return portfolio;
+      return position;
     } catch (error) {
-      console.error('create portfolio failed', error.message);
+      console.error('create position failed', error.message);
 
-      if (error instanceof PortfolioMongoError) {
+      if (error instanceof PositionMongoError) {
         throw error;
       }
-      throw new PortfolioMongoError(
+      throw new PositionMongoError(
         error.message,
-        ErrorCodes.MONGO_CREATE_PORTFOLIO_FAILED,
+        ErrorCodes.MONGO_CREATE_POSITION_FAILED,
         StatusCodes.INTERNAL_SERVER_ERROR
       );
     }
   }
 
-  async updatePortfolio(portfolio: PortfolioEntity): Promise<PortfolioEntity> {
-    console.log('update portfolio', portfolio);
+  async updatePosition(position: PositionEntity): Promise<PositionEntity> {
+    console.log('update position', position);
 
     try {
       const colName = AppConf.mongo.colNames[AppConsts.PORTFOLIOS_COLLECTION];
       if (!colName) {
-        throw new PortfolioMongoError(
+        throw new PositionMongoError(
           ErrorMessages.COLLECTION_NOT_FOUND,
           ErrorCodes.COLLECTION_NOT_FOUND,
           StatusCodes.INTERNAL_SERVER_ERROR
@@ -139,23 +139,23 @@ export class PortfolioMongo implements IPortfolioRepo {
 
       const db = await getClientDb(AppConf.mongo.dbName);
 
-      const { accountId } = portfolio;
+      const { accountId } = position;
       const updateAccount: PortfolioModel = {
-        ...portfolio,
+        ...position,
         updatedAt: new Date()
       };
       await db.collection<PortfolioModel>(colName).updateOne({ accountId: accountId }, { $set: updateAccount });
 
-      return portfolio;
+      return position;
     } catch (error) {
-      console.error('update portfolio failed', error.message);
+      console.error('update position failed', error.message);
 
-      if (error instanceof PortfolioMongoError) {
+      if (error instanceof PositionMongoError) {
         throw error;
       }
-      throw new PortfolioMongoError(
+      throw new PositionMongoError(
         error.message,
-        ErrorCodes.MONGO_UPDATE_PORTFOLIO_FAILED,
+        ErrorCodes.MONGO_UPDATE_POSITION_FAILED,
         StatusCodes.INTERNAL_SERVER_ERROR
       );
     }
