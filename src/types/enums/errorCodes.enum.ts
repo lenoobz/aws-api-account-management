@@ -37,6 +37,6 @@ export enum ErrorMessages {
   SERVICE_ACCOUNT_NOT_EXISTED = 'account does not exist',
 
   // PORTFOLIO SERVICE
-  SERVICE_POSITION_EXISTED = 'portfolio has already existed',
-  SERVICE_POSITION_NOT_EXISTED = 'portfolio does not exist'
+  SERVICE_POSITION_EXISTED = 'position has already existed',
+  SERVICE_POSITION_NOT_EXISTED = 'position does not exist'
 }
