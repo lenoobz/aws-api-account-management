@@ -26,7 +26,7 @@ export const EditPositionRequestScheme = Joi.object({
   accountId: Joi.string().required(),
   createdBy: Joi.string().required(),
   ticker: Joi.string().required(),
-  shares: Joi.number().required(),
+  shares: Joi.number(),
   deleted: Joi.boolean()
 });
 
