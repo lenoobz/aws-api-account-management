@@ -11,7 +11,7 @@ import {
   EditPositionRequestScheme,
   DeletePositionRequestDto,
   DeletePositionRequestScheme
-} from '../../types/requests/PortfolioRequest.dto';
+} from '../../types/requests/PositionRequest.dto';
 
 export class PositionService {
   positionRepo: IPositionRepo;
@@ -21,16 +21,45 @@ export class PositionService {
   }
 
   async getPositionsByAccountId(accountId: string): Promise<PositionEntity[]> {
-    console.log('get position by account id', accountId);
+    console.log('get positions by account id', accountId);
 
     try {
       return await this.positionRepo.searchPositions(
         { accountId: accountId, deleted: false, enabled: true },
-        { _id: 0, enabled: 0, deleted: 0, updatedAt: 0 },
-        { createdAt: 1 }
+        { _id: 0, enabled: 0, deleted: 0, updatedAt: 0, createdAt: 0, createdBy: 0 },
+        { ticker: 1 }
       );
     } catch (error) {
-      console.error('get position by account id', error.message);
+      console.error('get positions by account id', error.message);
+
+      if (error instanceof PositionServiceError) {
+        throw error;
+      }
+      throw new PositionServiceError(
+        error.message,
+        ErrorCodes.SERVICE_SEARCH_POSITIONS_FAILED,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  async getPositionsByAccountIds(accountIds: string[]): Promise<{ [accountId: string]: PositionEntity[] }> {
+    console.log('get positions by account ids', accountIds);
+
+    try {
+      const getPositionPromises = accountIds.map((id) => this.getPositionsByAccountId(id));
+      const positions = await Promise.all(getPositionPromises);
+
+      const result: { [accountId: string]: PositionEntity[] } = {};
+      accountIds.forEach((id, i) => {
+        if (!result[id]) {
+          result[id] = positions[i];
+        }
+      });
+
+      return result;
+    } catch (error) {
+      console.error('get positions by account ids', error.message);
 
       if (error instanceof PositionServiceError) {
         throw error;

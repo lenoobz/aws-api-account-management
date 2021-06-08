@@ -37,6 +37,9 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
         accountId = event.pathParameters.accountId;
         body = await portfolioService.getPositionsByAccountId(accountId);
         break;
+      case 'POST /v1/positions':
+        body = await portfolioService.getPositionsByAccountIds(JSON.parse(event.body));
+        break;
       case 'POST /v1/position':
         body = await portfolioService.addPosition(JSON.parse(event.body));
         break;
