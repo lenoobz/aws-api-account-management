@@ -28,8 +28,8 @@ export class PositionService {
 
     try {
       return await this.positionRepo.searchPositions(
-        { accountId: accountId, deleted: false, enabled: true },
-        { _id: 0, enabled: 0, deleted: 0, updatedAt: 0, createdAt: 0, createdBy: 0 },
+        { accountId, deleted: false, enabled: true },
+        { _id: 0, accountId: 0, enabled: 0, deleted: 0, updatedAt: 0, createdAt: 0, createdBy: 0 },
         { ticker: 1 }
       );
     } catch (error) {
