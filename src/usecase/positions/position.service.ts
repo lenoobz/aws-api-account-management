@@ -12,12 +12,15 @@ import {
   DeletePositionRequestDto,
   DeletePositionRequestScheme
 } from '../../types/requests/PositionRequest.dto';
+import { AccountService } from '../accounts/account.service';
 
 export class PositionService {
   positionRepo: IPositionRepo;
+  accountService: AccountService;
 
-  constructor(positionRepo: IPositionRepo) {
+  constructor(positionRepo: IPositionRepo, accountService: AccountService) {
     this.positionRepo = positionRepo;
+    this.accountService = accountService;
   }
 
   async getPositionsByAccountId(accountId: string): Promise<PositionEntity[]> {
@@ -43,10 +46,13 @@ export class PositionService {
     }
   }
 
-  async getPositionsByAccountIds(accountIds: string[]): Promise<{ [accountId: string]: PositionEntity[] }> {
-    console.log('get positions by account ids', accountIds);
+  async getPositionsByUserId(userId: string): Promise<{ [accountId: string]: PositionEntity[] }> {
+    console.log('get positions by user id', userId);
 
     try {
+      const accounts = await this.accountService.getAccountsByUserId(userId);
+      const accountIds = accounts.map((account) => account.id).filter((id) => id);
+
       const getPositionPromises = accountIds.map((id) => this.getPositionsByAccountId(id));
       const positions = await Promise.all(getPositionPromises);
 
@@ -59,7 +65,7 @@ export class PositionService {
 
       return result;
     } catch (error) {
-      console.error('get positions by account ids', error.message);
+      console.error('get positions by user id', error.message);
 
       if (error instanceof PositionServiceError) {
         throw error;

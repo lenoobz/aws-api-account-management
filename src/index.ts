@@ -11,12 +11,13 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
     'Content-Type': 'application/json'
   };
 
-  let userId, accountId;
-  const portfolioMongo = new PortfolioMongo();
-  const portfolioService = new PositionService(portfolioMongo);
+  let userId;
 
   const accountMongo = new AccountMongo();
   const accountService = new AccountService(accountMongo);
+
+  const portfolioMongo = new PortfolioMongo();
+  const portfolioService = new PositionService(portfolioMongo, accountService);
 
   try {
     switch (event.routeKey) {
@@ -33,12 +34,9 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
       case 'DELETE /v1/account':
         body = await accountService.deleteAccount(JSON.parse(event.body));
         break;
-      case 'GET /v1/positions/{accountId}':
-        accountId = event.pathParameters.accountId;
-        body = await portfolioService.getPositionsByAccountId(accountId);
-        break;
-      case 'POST /v1/positions':
-        body = await portfolioService.getPositionsByAccountIds(JSON.parse(event.body));
+      case 'GET /v1/positions/{userId}':
+        userId = event.pathParameters.userId;
+        body = await portfolioService.getPositionsByUserId(userId);
         break;
       case 'POST /v1/position':
         body = await portfolioService.addPosition(JSON.parse(event.body));
