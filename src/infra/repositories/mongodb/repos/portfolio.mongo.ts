@@ -139,12 +139,12 @@ export class PortfolioMongo implements IPositionRepo {
 
       const db = await getClientDb(AppConf.mongo.dbName);
 
-      const { accountId } = position;
+      const { accountId, createdBy, ticker } = position;
       const updateAccount: PortfolioModel = {
         ...position,
         updatedAt: new Date()
       };
-      await db.collection<PortfolioModel>(colName).updateOne({ accountId: accountId }, { $set: updateAccount });
+      await db.collection<PortfolioModel>(colName).updateOne({ accountId, createdBy, ticker }, { $set: updateAccount });
 
       return position;
     } catch (error) {
