@@ -244,7 +244,7 @@ export class AccountService {
     }
   }
 
-  async updatePosition(editPositionReq: EditPositionRequestDto): Promise<PositionEntity> {
+  async updatePosition(editPositionReq: EditPositionRequestDto): Promise<PositionEntity[]> {
     const joi = EditPositionRequestScheme.validate(editPositionReq);
     if (joi.error) {
       throw new InvalidParamError(
@@ -269,7 +269,8 @@ export class AccountService {
       }
 
       const editPosition: PositionEntity = { ...editPositionReq };
-      return await this.positionRepo.updatePosition(editPosition);
+      await this.positionRepo.updatePosition(editPosition);
+      return await this.getPositionsByAccountId(accountId);
     } catch (error) {
       console.error('edit position failed', error.message);
 
@@ -284,7 +285,7 @@ export class AccountService {
     }
   }
 
-  async deletePosition(deletePositionReq: DeletePositionRequestDto): Promise<PositionEntity[] | undefined> {
+  async deletePosition(deletePositionReq: DeletePositionRequestDto): Promise<PositionEntity[]> {
     const joi = DeletePositionRequestScheme.validate(deletePositionReq);
     if (joi.error) {
       throw new InvalidParamError(
@@ -298,8 +299,7 @@ export class AccountService {
 
     try {
       const { accountId, createdBy, ticker } = deletePositionReq;
-      await this.updatePosition({ accountId, createdBy, ticker, deleted: true });
-      return await this.getPositionsByAccountId(accountId);
+      return await this.updatePosition({ accountId, createdBy, ticker, deleted: true });
     } catch (error) {
       console.error('delete position failed', error.message);
 
