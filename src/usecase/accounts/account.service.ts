@@ -130,7 +130,7 @@ export class AccountService {
       const positions = await this.getPositionsByAccountId(id);
       if (positions && positions.length > 0) {
         const deletePromises = positions.map((p) =>
-          this.updatePosition({ accountId: id, createdBy, ticker: p.ticker, deleted: true })
+          this.updatePosition({ accountId: id, createdBy, ticker: p.ticker, enabled: false, deleted: true })
         );
 
         await Promise.all(deletePromises);
