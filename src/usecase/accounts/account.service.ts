@@ -299,7 +299,7 @@ export class AccountService {
 
     try {
       const { accountId, createdBy, ticker } = deletePositionReq;
-      return await this.updatePosition({ accountId, createdBy, ticker, deleted: true });
+      return await this.updatePosition({ accountId, createdBy, ticker, enabled: false, deleted: true });
     } catch (error) {
       console.error('delete position failed', error.message);
 
