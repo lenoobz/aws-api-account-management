@@ -2,7 +2,6 @@ import { APIGatewayProxyEventV2, APIGatewayProxyHandlerV2 } from 'aws-lambda';
 import { AccountMongo } from './infra/repositories/mongodb/repos/account.mongo';
 import { PortfolioMongo } from './infra/repositories/mongodb/repos/portfolio.mongo';
 import { AccountService } from './usecase/accounts/account.service';
-import { PositionService } from './usecase/positions/position.service';
 
 export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEventV2) => {
   let body;
@@ -14,10 +13,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
   let userId;
 
   const accountMongo = new AccountMongo();
-  const accountService = new AccountService(accountMongo);
-
   const portfolioMongo = new PortfolioMongo();
-  const portfolioService = new PositionService(portfolioMongo, accountService);
+  const accountService = new AccountService(accountMongo, portfolioMongo);
 
   try {
     switch (event.routeKey) {
@@ -36,16 +33,16 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
         break;
       case 'GET /v1/positions/{userId}':
         userId = event.pathParameters.userId;
-        body = await portfolioService.getPositionsByUserId(userId);
+        body = await accountService.getPositionsByUserId(userId);
         break;
       case 'POST /v1/position':
-        body = await portfolioService.addPosition(JSON.parse(event.body));
+        body = await accountService.addPosition(JSON.parse(event.body));
         break;
       case 'PUT /v1/position':
-        body = await portfolioService.updatePosition(JSON.parse(event.body));
+        body = await accountService.updatePosition(JSON.parse(event.body));
         break;
       case 'DELETE /v1/position':
-        body = await portfolioService.deletePosition(JSON.parse(event.body));
+        body = await accountService.deletePosition(JSON.parse(event.body));
         break;
       default:
         throw new Error(`Unsupported route: "${event.routeKey}"`);

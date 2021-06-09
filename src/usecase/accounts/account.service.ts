@@ -1,9 +1,12 @@
 import { StatusCodes } from 'http-status-codes';
 import { AccountServiceError } from '../../errors/AccountServiceError';
 import { InvalidParamError } from '../../errors/InvalidParamError';
+import { PositionServiceError } from '../../errors/PositionServiceError';
 import { AccountEntity } from '../../types/entities/account.entity';
+import { PositionEntity } from '../../types/entities/portfolio.entity';
 import { ErrorCodes, ErrorMessages } from '../../types/enums/errorCodes.enum';
 import { IAccountRepo } from '../../types/repositories/IAccountRepo';
+import { IPositionRepo } from '../../types/repositories/IPositionRepo';
 import {
   AddAccountRequestDto,
   AddAccountRequestScheme,
@@ -12,12 +15,22 @@ import {
   EditAccountRequestDto,
   EditAccountRequestScheme
 } from '../../types/requests/AccountRequest.dto';
+import {
+  AddPositionRequestDto,
+  AddPositionRequestScheme,
+  DeletePositionRequestDto,
+  DeletePositionRequestScheme,
+  EditPositionRequestDto,
+  EditPositionRequestScheme
+} from '../../types/requests/PositionRequest.dto';
 
 export class AccountService {
   accountRepo: IAccountRepo;
+  positionRepo: IPositionRepo;
 
-  constructor(accountRepo: IAccountRepo) {
+  constructor(accountRepo: IAccountRepo, positionRepo: IPositionRepo) {
     this.accountRepo = accountRepo;
+    this.positionRepo = positionRepo;
   }
 
   async getAccountsByUserId(userId: string): Promise<AccountEntity[]> {
@@ -114,6 +127,16 @@ export class AccountService {
     try {
       const { id, createdBy } = deleteAccountReq;
       await this.updateAccount({ id, createdBy, deleted: true });
+      const positions = await this.getPositionsByAccountId(id);
+
+      if (positions && positions.length > 0) {
+        const deletePositionPromise = positions.map((p) =>
+          this.deletePosition({ accountId: id, createdBy, ticker: p.ticker }, false)
+        );
+
+        await Promise.all(deletePositionPromise);
+      }
+
       return await this.getAccountsByUserId(createdBy);
     } catch (error) {
       console.error('delete account failed', error.message);
@@ -124,6 +147,175 @@ export class AccountService {
       throw new AccountServiceError(
         error.message,
         ErrorCodes.SERVICE_DELETE_ACCOUNT_FAILED,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  async getPositionsByAccountId(accountId: string): Promise<PositionEntity[]> {
+    console.log('get positions by account id', accountId);
+
+    try {
+      return await this.positionRepo.searchPositions(
+        { accountId, deleted: false, enabled: true },
+        { _id: 0, accountId: 0, enabled: 0, deleted: 0, updatedAt: 0, createdAt: 0, createdBy: 0 },
+        { ticker: 1 }
+      );
+    } catch (error) {
+      console.error('get positions by account id', error.message);
+
+      if (error instanceof PositionServiceError) {
+        throw error;
+      }
+      throw new PositionServiceError(
+        error.message,
+        ErrorCodes.SERVICE_SEARCH_POSITIONS_FAILED,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  async getPositionsByUserId(userId: string): Promise<{ [accountId: string]: PositionEntity[] }> {
+    console.log('get positions by user id', userId);
+
+    try {
+      const accounts = await this.getAccountsByUserId(userId);
+      const accountIds = accounts.map((account) => account.id).filter((id) => id);
+
+      const getPositionPromises = accountIds.map((id) => this.getPositionsByAccountId(id));
+      const positions = await Promise.all(getPositionPromises);
+
+      const result: { [accountId: string]: PositionEntity[] } = {};
+      accountIds.forEach((id, i) => {
+        if (!result[id]) {
+          result[id] = positions[i];
+        }
+      });
+
+      return result;
+    } catch (error) {
+      console.error('get positions by user id', error.message);
+
+      if (error instanceof PositionServiceError) {
+        throw error;
+      }
+      throw new PositionServiceError(
+        error.message,
+        ErrorCodes.SERVICE_SEARCH_POSITIONS_FAILED,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  async addPosition(addPositionReq: AddPositionRequestDto): Promise<PositionEntity> {
+    const joi = AddPositionRequestScheme.validate(addPositionReq);
+    if (joi.error) {
+      throw new InvalidParamError(
+        joi.error.message,
+        ErrorCodes.SERVICE_CREATE_POSITION_FAILED,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    console.log('add postion', addPositionReq);
+
+    try {
+      const { accountId, createdBy, ticker } = addPositionReq;
+      const isExisting = await this.positionRepo.isPositionExisted(accountId, createdBy, ticker);
+
+      if (isExisting) {
+        throw new PositionServiceError(
+          ErrorMessages.SERVICE_POSITION_EXISTED,
+          ErrorCodes.SERVICE_POSITION_EXISTED,
+          StatusCodes.CONFLICT
+        );
+      }
+
+      return await this.positionRepo.createPosition(addPositionReq);
+    } catch (error) {
+      console.error('add position failed', error.message);
+
+      if (error instanceof PositionServiceError) {
+        throw error;
+      }
+      throw new PositionServiceError(
+        error.message,
+        ErrorCodes.SERVICE_UPDATE_POSITION_FAILED,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  async updatePosition(editPositionReq: EditPositionRequestDto): Promise<PositionEntity> {
+    const joi = EditPositionRequestScheme.validate(editPositionReq);
+    if (joi.error) {
+      throw new InvalidParamError(
+        joi.error.message,
+        ErrorCodes.SERVICE_UPDATE_POSITION_FAILED,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    console.log('edit position', editPositionReq);
+
+    try {
+      const { accountId, createdBy, ticker } = editPositionReq;
+      const isExisting = await this.positionRepo.isPositionExisted(accountId, createdBy, ticker);
+
+      if (!isExisting) {
+        throw new PositionServiceError(
+          ErrorMessages.SERVICE_POSITION_NOT_EXISTED,
+          ErrorCodes.SERVICE_POSITION_NOT_EXISTED,
+          StatusCodes.CONFLICT
+        );
+      }
+
+      const editPosition: PositionEntity = { ...editPositionReq };
+      return await this.positionRepo.updatePosition(editPosition);
+    } catch (error) {
+      console.error('edit position failed', error.message);
+
+      if (error instanceof PositionServiceError) {
+        throw error;
+      }
+      throw new PositionServiceError(
+        error.message,
+        ErrorCodes.SERVICE_UPDATE_POSITION_FAILED,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  async deletePosition(
+    deletePositionReq: DeletePositionRequestDto,
+    getReturn = true
+  ): Promise<PositionEntity[] | undefined> {
+    const joi = DeletePositionRequestScheme.validate(deletePositionReq);
+    if (joi.error) {
+      throw new InvalidParamError(
+        joi.error.message,
+        ErrorCodes.SERVICE_DELETE_POSITION_FAILED,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    console.log('delete position', deletePositionReq);
+
+    try {
+      const { accountId, createdBy, ticker } = deletePositionReq;
+      await this.updatePosition({ accountId, createdBy, ticker, deleted: true });
+      if (getReturn) {
+        return await this.getPositionsByAccountId(accountId);
+      }
+    } catch (error) {
+      console.error('delete position failed', error.message);
+
+      if (error instanceof PositionServiceError) {
+        throw error;
+      }
+      throw new PositionServiceError(
+        error.message,
+        ErrorCodes.SERVICE_DELETE_POSITION_FAILED,
         StatusCodes.INTERNAL_SERVER_ERROR
       );
     }
