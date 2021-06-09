@@ -224,11 +224,7 @@ export class AccountService {
       const isExisting = await this.positionRepo.isPositionExisted(accountId, createdBy, ticker);
 
       if (isExisting) {
-        throw new PositionServiceError(
-          ErrorMessages.SERVICE_POSITION_EXISTED,
-          ErrorCodes.SERVICE_POSITION_EXISTED,
-          StatusCodes.CONFLICT
-        );
+        return await this.positionRepo.updatePosition(addPositionReq);
       }
 
       return await this.positionRepo.createPosition(addPositionReq);
