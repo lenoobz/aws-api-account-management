@@ -126,17 +126,15 @@ export class AccountService {
 
     try {
       const { id, createdBy } = deleteAccountReq;
-      await this.updateAccount({ id, createdBy, deleted: true });
+
       const positions = await this.getPositionsByAccountId(id);
-
       if (positions && positions.length > 0) {
-        const deletePositionPromise = positions.map((p) =>
-          this.deletePosition({ accountId: id, createdBy, ticker: p.ticker }, false)
-        );
-
-        await Promise.all(deletePositionPromise);
+        for (let i = 0; i < positions.length; i++) {
+          await this.deletePosition({ accountId: id, createdBy, ticker: positions[i].ticker }, false);
+        }
       }
 
+      await this.updateAccount({ id, createdBy, deleted: true });
       return await this.getAccountsByUserId(createdBy);
     } catch (error) {
       console.error('delete account failed', error.message);
