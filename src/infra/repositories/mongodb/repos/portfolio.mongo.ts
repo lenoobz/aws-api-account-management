@@ -144,7 +144,9 @@ export class PortfolioMongo implements IPositionRepo {
         ...position,
         updatedAt: new Date()
       };
-      await db.collection<PortfolioModel>(colName).updateOne({ accountId, createdBy, ticker }, { $set: updateAccount });
+      await db
+        .collection<PortfolioModel>(colName)
+        .updateOne({ accountId, createdBy, ticker, enabled: true }, { $set: updateAccount });
 
       return position;
     } catch (error) {

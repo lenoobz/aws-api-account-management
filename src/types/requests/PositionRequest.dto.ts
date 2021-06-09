@@ -19,6 +19,7 @@ export type EditPositionRequestDto = {
   createdBy: string;
   ticker: string;
   shares?: number;
+  enabled?: boolean;
   deleted?: boolean;
 };
 
