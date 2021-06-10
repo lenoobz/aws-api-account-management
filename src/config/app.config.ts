@@ -28,7 +28,7 @@ export const AppConf: AppConfig = {
     host: MONGO_DB_HOST as string,
     username: MONGO_DB_USERNAME as string,
     password: MONGO_DB_PASSWORD as string,
-    dbName: 'povi_dev',
+    dbName: 'povi',
     schemaVersion: '1',
     colNames: {
       accounts: 'accounts',
