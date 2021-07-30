@@ -43,7 +43,7 @@ export class AccountService {
         { createdAt: 1 }
       );
     } catch (error) {
-      console.error('get accounts by user id', error.message);
+      console.error('get accounts by user id failed', error.message);
 
       if (error instanceof AccountServiceError) {
         throw error;
@@ -194,7 +194,7 @@ export class AccountService {
 
       return result;
     } catch (error) {
-      console.error('get positions by user id', error.message);
+      console.error('get positions by user id failed', error.message);
 
       if (error instanceof PositionServiceError) {
         throw error;
