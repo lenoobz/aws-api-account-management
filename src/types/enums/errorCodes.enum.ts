@@ -32,6 +32,7 @@ export enum ErrorCodes {
 
 export enum ErrorMessages {
   COLLECTION_NOT_FOUND = 'collection not found',
+  INTERNAL_SERVER_ERROR = 'internal server error',
 
   // ACCOUNT SERVICE
   SERVICE_ACCOUNT_NOT_EXISTED = 'account does not exist',

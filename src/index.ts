@@ -1,11 +1,13 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyHandlerV2 } from 'aws-lambda';
+import { StatusCodes } from 'http-status-codes';
 import { AccountMongo } from './infra/repositories/mongodb/repos/account.mongo';
 import { PortfolioMongo } from './infra/repositories/mongodb/repos/portfolio.mongo';
+import { ErrorCodes, ErrorMessages } from './types/enums/errorCodes.enum';
 import { AccountService } from './usecase/accounts/account.service';
 
 export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEventV2) => {
   let body;
-  let statusCode = 200;
+  let statusCode = StatusCodes.OK;
   const headers = {
     'Content-Type': 'application/json'
   };
@@ -47,9 +49,14 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
       default:
         throw new Error(`Unsupported route: "${event.routeKey}"`);
     }
-  } catch (err) {
-    statusCode = 400;
-    body = err.message;
+  } catch (error) {
+    statusCode = error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
+    body = {
+      error: {
+        code: error.code || ErrorCodes.INTERNAL_SERVER_ERROR,
+        message: error.message || ErrorMessages.INTERNAL_SERVER_ERROR
+      }
+    };
   } finally {
     body = JSON.stringify(body);
   }
