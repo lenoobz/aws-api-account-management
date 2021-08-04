@@ -32,7 +32,12 @@ export const AppConf: AppConfig = {
     schemaVersion: '1',
     colNames: {
       accounts: 'accounts',
-      portfolios: 'portfolios'
+      portfolios: 'portfolios',
+      assets: 'assets',
+      assetPrices: 'asset_prices',
+      assetSectors: 'asset_sectors',
+      assetCountries: 'asset_countries',
+      assetDividends: 'asset_dividends'
     }
   }
 };
