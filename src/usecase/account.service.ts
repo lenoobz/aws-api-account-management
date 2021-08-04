@@ -1,12 +1,12 @@
 import { StatusCodes } from 'http-status-codes';
-import { AccountServiceError } from '../../errors/account.error';
-import { InvalidParamError } from '../../errors/generic.error';
-import { PositionServiceError } from '../../errors/position.error';
-import { AccountEntity } from '../../types/entities/account.entity';
-import { PositionEntity } from '../../types/entities/position.entity';
-import { ErrorCodes, ErrorMessages } from '../../consts/errors.enum';
-import { IAccountRepo } from '../../types/repositories/account.repo';
-import { IPositionRepo } from '../../types/repositories/position.repo';
+import { AccountServiceError } from '../errors/account.error';
+import { InvalidParamError } from '../errors/generic.error';
+import { PositionServiceError } from '../errors/position.error';
+import { AccountEntity } from '../types/entities/account.entity';
+import { PositionEntity } from '../types/entities/position.entity';
+import { ErrorCodes, ErrorMessages } from '../consts/errors.enum';
+import { IAccountRepo } from '../types/repositories/account.repo';
+import { IPositionRepo } from '../types/repositories/position.repo';
 import {
   AddAccountRequestDto,
   AddAccountRequestScheme,
@@ -14,7 +14,7 @@ import {
   DeleteAccountRequestScheme,
   EditAccountRequestDto,
   EditAccountRequestScheme
-} from '../../types/requests/account.request';
+} from '../types/requests/account.request';
 import {
   AddPositionRequestDto,
   AddPositionRequestScheme,
@@ -22,7 +22,7 @@ import {
   DeletePositionRequestScheme,
   EditPositionRequestDto,
   EditPositionRequestScheme
-} from '../../types/requests/position.request';
+} from '../types/requests/position.request';
 
 export class AccountService {
   accountRepo: IAccountRepo;

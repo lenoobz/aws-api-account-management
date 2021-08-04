@@ -3,7 +3,12 @@ import { StatusCodes } from 'http-status-codes';
 import { AccountMongo } from './infra/repositories/mongodb/repos/account.mongo';
 import { PositionMongo } from './infra/repositories/mongodb/repos/position.mongo';
 import { ErrorCodes, ErrorMessages } from './consts/errors.enum';
-import { AccountService } from './usecase/accounts/account.service';
+import { AccountService } from './usecase/account.service';
+import { AssetMongo } from './infra/repositories/mongodb/repos/asset.mongo';
+import { AssetService } from './usecase/asset.service';
+import { AssetPriceMongo } from './infra/repositories/mongodb/repos/asset-price.mongo';
+import { AssetPriceService } from './usecase/asset-price.service';
+import { PortfolioService } from './usecase/portfolio.service';
 
 export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEventV2) => {
   let body;
@@ -17,6 +22,14 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
   const accountMongo = new AccountMongo();
   const positionMongo = new PositionMongo();
   const accountService = new AccountService(accountMongo, positionMongo);
+
+  const assetMongo = new AssetMongo();
+  const assetService = new AssetService(assetMongo);
+
+  const assetPriceMongo = new AssetPriceMongo();
+  const assetPriceService = new AssetPriceService(assetPriceMongo);
+
+  const portfolioService = new PortfolioService(assetService, accountService, assetPriceService);
 
   try {
     switch (event.routeKey) {
@@ -46,11 +59,9 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
       case 'DELETE /v1/position':
         body = await accountService.deletePosition(JSON.parse(event.body));
         break;
-      case 'POST /v1/portfolios':
-        break;
-      case 'POST /v1/breakdowns':
-        break;
-      case 'POST /v1/dividends':
+      case 'GET /v1/portfolios/{userId}':
+        userId = event.pathParameters.userId;
+        body = await portfolioService.getPortfoliosByUserId(userId);
         break;
       default:
         throw new Error(`Unsupported route: "${event.routeKey}"`);
