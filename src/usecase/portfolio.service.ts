@@ -19,7 +19,8 @@ export class PortfolioService {
     try {
       const accounts = await this.accountService.getAccountsByUserId(userId);
 
-      const resp = accounts.map(async (account) => {
+      const resp = [];
+      for (const account of accounts) {
         const positions = await this.accountService.getPositionsByAccountId(account.id);
         const tickers = positions.map((position) => position.ticker);
         const assets = await this.assetService.getAssetDetailsByTickers({ tickers: tickers });
@@ -35,12 +36,12 @@ export class PortfolioService {
           };
         });
 
-        return {
+        resp.push({
           accountId: account.id,
           accountName: account.name,
           positions: positionDetails
-        };
-      });
+        });
+      }
 
       return resp;
     } catch (error) {
