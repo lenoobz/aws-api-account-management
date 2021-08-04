@@ -9,6 +9,11 @@ import { AssetService } from './usecase/asset.service';
 import { AssetPriceMongo } from './infra/repositories/mongodb/repos/asset-price.mongo';
 import { AssetPriceService } from './usecase/asset-price.service';
 import { PortfolioService } from './usecase/portfolio.service';
+import { BreakdownService } from './usecase/breakdown.service';
+import { AssetSectorMongo } from './infra/repositories/mongodb/repos/asset-sector.mongo';
+import { AssetSectorService } from './usecase/asset-sector.service';
+import { AssetCountryService } from './usecase/asset-country.service';
+import { AssetCountryMongo } from './infra/repositories/mongodb/repos/asset-country.mongo';
 
 export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEventV2) => {
   let body;
@@ -30,6 +35,20 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
   const assetPriceService = new AssetPriceService(assetPriceMongo);
 
   const portfolioService = new PortfolioService(assetService, accountService, assetPriceService);
+
+  const assetSectorMongo = new AssetSectorMongo();
+  const assetSectorService = new AssetSectorService(assetSectorMongo);
+
+  const assetCountryMongo = new AssetCountryMongo();
+  const assetCountryService = new AssetCountryService(assetCountryMongo);
+
+  const breakdownService = new BreakdownService(
+    assetService,
+    accountService,
+    assetPriceService,
+    assetSectorService,
+    assetCountryService
+  );
 
   try {
     switch (event.routeKey) {
@@ -62,6 +81,10 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
       case 'GET /v1/portfolios/{userId}':
         userId = event.pathParameters.userId;
         body = await portfolioService.getPortfoliosByUserId(userId);
+        break;
+      case 'GET /v1/breakdown/{userId}':
+        userId = event.pathParameters.userId;
+        body = await breakdownService.getBreakdownByUserId(userId);
         break;
       default:
         throw new Error(`Unsupported route: "${event.routeKey}"`);
