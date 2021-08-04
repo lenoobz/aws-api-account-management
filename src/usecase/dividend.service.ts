@@ -1,32 +1,29 @@
 import { AccountService } from './account.service';
-import { AssetCountryService } from './asset-country.service';
+import { AssetDividendService } from './asset-dividend.service';
 import { AssetPriceService } from './asset-price.service';
-import { AssetSectorService } from './asset-sector.service';
 import { AssetService } from './asset.service';
 
-export class BreakdownService {
+export class DividendService {
   assetService: AssetService;
   accountService: AccountService;
   assetPriceService: AssetPriceService;
-  assetSectorService: AssetSectorService;
-  assetCountryService: AssetCountryService;
+  assetDividendService: AssetDividendService;
 
   constructor(
     assetService: AssetService,
     accountService: AccountService,
     assetPriceService: AssetPriceService,
-    assetSectorService: AssetSectorService,
-    assetCountryService: AssetCountryService
+    assetDividendService: AssetDividendService
   ) {
     this.assetService = assetService;
     this.accountService = accountService;
     this.assetPriceService = assetPriceService;
-    this.assetSectorService = assetSectorService;
-    this.assetCountryService = assetCountryService;
+    this.assetDividendService = assetDividendService;
   }
 
-  async getBreakdownByUserId(userId: string): Promise<any> {
-    console.log('get breakdown by user id', userId);
+  async getDividendsByUserId(userId: string): Promise<any> {
+    console.log('get dividends by user id', userId);
+
     try {
       const accounts = await this.accountService.getAccountsByUserId(userId);
 
@@ -43,24 +40,19 @@ export class BreakdownService {
         const pricesPromise = this.assetPriceService.getAssetPricesByTickers({ tickers: tickers });
         promises.push(pricesPromise);
 
-        const sectorsPromise = this.assetSectorService.getAssetSectorsByTickers({ tickers: tickers });
-        promises.push(sectorsPromise);
+        const dividendsPromise = this.assetDividendService.getAssetDividendsByTickers({ tickers: tickers });
+        promises.push(dividendsPromise);
 
-        const countriesPromise = this.assetCountryService.getAssetCountriesByTickers({ tickers: tickers });
-        promises.push(countriesPromise);
-
-        const [assets, prices, sectors, countries] = await Promise.all(promises);
+        const [assets, prices, dividends] = await Promise.all(promises);
 
         const positionDetails = positions.map((position) => {
           return {
             ticker: position.ticker,
             shares: position.shares,
-            assetClass: assets[position.ticker].assetClass,
             name: assets[position.ticker].name,
             price: prices[position.ticker].price,
             currency: prices[position.ticker].currency ?? assets[position.ticker].currency,
-            sectors: sectors[position.ticker],
-            countries: countries[position.ticker]
+            dividends: dividends[position.ticker]
           };
         });
 
@@ -73,7 +65,7 @@ export class BreakdownService {
 
       return resp;
     } catch (error) {
-      console.error('get breakdown by user id failed', error.message);
+      console.error('get dividends by user id failed', error.message);
     }
   }
 }

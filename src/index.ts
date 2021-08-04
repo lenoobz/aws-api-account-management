@@ -14,6 +14,9 @@ import { AssetSectorMongo } from './infra/repositories/mongodb/repos/asset-secto
 import { AssetSectorService } from './usecase/asset-sector.service';
 import { AssetCountryService } from './usecase/asset-country.service';
 import { AssetCountryMongo } from './infra/repositories/mongodb/repos/asset-country.mongo';
+import { AssetDividendMongo } from './infra/repositories/mongodb/repos/asset-dividend.mongo';
+import { AssetDividendService } from './usecase/asset-dividend.service';
+import { DividendService } from './usecase/dividend.service';
 
 export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEventV2) => {
   let body;
@@ -42,6 +45,9 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
   const assetCountryMongo = new AssetCountryMongo();
   const assetCountryService = new AssetCountryService(assetCountryMongo);
 
+  const assetDividendMongo = new AssetDividendMongo();
+  const assetDividendService = new AssetDividendService(assetDividendMongo);
+
   const breakdownService = new BreakdownService(
     assetService,
     accountService,
@@ -49,6 +55,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
     assetSectorService,
     assetCountryService
   );
+
+  const dividendService = new DividendService(assetService, accountService, assetPriceService, assetDividendService);
 
   try {
     switch (event.routeKey) {
@@ -85,6 +93,10 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
       case 'GET /v1/breakdown/{userId}':
         userId = event.pathParameters.userId;
         body = await breakdownService.getBreakdownByUserId(userId);
+        break;
+      case 'GET /v1/dividends/{userId}':
+        userId = event.pathParameters.userId;
+        body = await dividendService.getDividendsByUserId(userId);
         break;
       default:
         throw new Error(`Unsupported route: "${event.routeKey}"`);
