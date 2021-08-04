@@ -1,12 +1,12 @@
 import { StatusCodes } from 'http-status-codes';
-import { AccountServiceError } from '../../errors/AccountServiceError';
-import { InvalidParamError } from '../../errors/InvalidParamError';
-import { PositionServiceError } from '../../errors/PositionServiceError';
+import { AccountServiceError } from '../../errors/account.error';
+import { InvalidParamError } from '../../errors/generic.error';
+import { PositionServiceError } from '../../errors/position.error';
 import { AccountEntity } from '../../types/entities/account.entity';
-import { PositionEntity } from '../../types/entities/portfolio.entity';
-import { ErrorCodes, ErrorMessages } from '../../types/enums/errorCodes.enum';
-import { IAccountRepo } from '../../types/repositories/IAccountRepo';
-import { IPositionRepo } from '../../types/repositories/IPositionRepo';
+import { PositionEntity } from '../../types/entities/position.entity';
+import { ErrorCodes, ErrorMessages } from '../../consts/errors.enum';
+import { IAccountRepo } from '../../types/repositories/account.repo';
+import { IPositionRepo } from '../../types/repositories/position.repo';
 import {
   AddAccountRequestDto,
   AddAccountRequestScheme,
@@ -14,7 +14,7 @@ import {
   DeleteAccountRequestScheme,
   EditAccountRequestDto,
   EditAccountRequestScheme
-} from '../../types/requests/AccountRequest.dto';
+} from '../../types/requests/account.request';
 import {
   AddPositionRequestDto,
   AddPositionRequestScheme,
@@ -22,7 +22,7 @@ import {
   DeletePositionRequestScheme,
   EditPositionRequestDto,
   EditPositionRequestScheme
-} from '../../types/requests/PositionRequest.dto';
+} from '../../types/requests/position.request';
 
 export class AccountService {
   accountRepo: IAccountRepo;
@@ -57,12 +57,12 @@ export class AccountService {
   }
 
   async addAccount(addAccountReq: AddAccountRequestDto): Promise<AccountEntity> {
+    console.log('add account', addAccountReq);
+
     const joi = AddAccountRequestScheme.validate(addAccountReq);
     if (joi.error) {
       throw new InvalidParamError(joi.error.message, ErrorCodes.SERVICE_CREATE_ACCOUNT_FAILED, StatusCodes.BAD_REQUEST);
     }
-
-    console.log('add account', addAccountReq);
 
     try {
       return await this.accountRepo.createAccount(addAccountReq);
@@ -81,12 +81,12 @@ export class AccountService {
   }
 
   async updateAccount(editAccountReq: EditAccountRequestDto): Promise<AccountEntity> {
+    console.log('update account', editAccountReq);
+
     const joi = EditAccountRequestScheme.validate(editAccountReq);
     if (joi.error) {
       throw new InvalidParamError(joi.error.message, ErrorCodes.SERVICE_UPDATE_ACCOUNT_FAILED, StatusCodes.BAD_REQUEST);
     }
-
-    console.log('update account', editAccountReq);
 
     try {
       const { id } = editAccountReq;
@@ -117,12 +117,12 @@ export class AccountService {
   }
 
   async deleteAccount(deleteAccountReq: DeleteAccountRequestDto): Promise<AccountEntity[]> {
+    console.log('delete account', deleteAccountReq);
+
     const joi = DeleteAccountRequestScheme.validate(deleteAccountReq);
     if (joi.error) {
       throw new InvalidParamError(joi.error.message, ErrorCodes.SERVICE_UPDATE_ACCOUNT_FAILED, StatusCodes.BAD_REQUEST);
     }
-
-    console.log('delete account', deleteAccountReq);
 
     try {
       const { id, createdBy } = deleteAccountReq;
@@ -208,6 +208,8 @@ export class AccountService {
   }
 
   async addPosition(addPositionReq: AddPositionRequestDto): Promise<PositionEntity[]> {
+    console.log('add postion', addPositionReq);
+
     const joi = AddPositionRequestScheme.validate(addPositionReq);
     if (joi.error) {
       throw new InvalidParamError(
@@ -216,8 +218,6 @@ export class AccountService {
         StatusCodes.BAD_REQUEST
       );
     }
-
-    console.log('add postion', addPositionReq);
 
     try {
       const { accountId, createdBy, ticker } = addPositionReq;
@@ -245,6 +245,8 @@ export class AccountService {
   }
 
   async updatePosition(editPositionReq: EditPositionRequestDto): Promise<PositionEntity[]> {
+    console.log('edit position', editPositionReq);
+
     const joi = EditPositionRequestScheme.validate(editPositionReq);
     if (joi.error) {
       throw new InvalidParamError(
@@ -253,8 +255,6 @@ export class AccountService {
         StatusCodes.BAD_REQUEST
       );
     }
-
-    console.log('edit position', editPositionReq);
 
     try {
       const { accountId, createdBy, ticker } = editPositionReq;
@@ -286,6 +286,8 @@ export class AccountService {
   }
 
   async deletePosition(deletePositionReq: DeletePositionRequestDto): Promise<PositionEntity[]> {
+    console.log('delete position', deletePositionReq);
+
     const joi = DeletePositionRequestScheme.validate(deletePositionReq);
     if (joi.error) {
       throw new InvalidParamError(
@@ -294,8 +296,6 @@ export class AccountService {
         StatusCodes.BAD_REQUEST
       );
     }
-
-    console.log('delete position', deletePositionReq);
 
     try {
       const { accountId, createdBy, ticker } = deletePositionReq;

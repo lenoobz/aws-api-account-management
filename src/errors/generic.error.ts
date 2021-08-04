@@ -1,10 +1,10 @@
 import { StatusCodes } from 'http-status-codes';
-import { ErrorCodes } from '../types/enums/errorCodes.enum';
+import { ErrorCodes } from '../consts/errors.enum';
 
-export class PositionServiceError extends Error {
+export class InvalidParamError extends Error {
   constructor(msg: string, readonly errorCode: ErrorCodes, readonly statusCode: StatusCodes) {
     super(msg);
-    Object.setPrototypeOf(this, PositionServiceError.prototype);
+    Object.setPrototypeOf(this, InvalidParamError.prototype);
 
     this.name = this.constructor.name;
     this.errorCode = errorCode;

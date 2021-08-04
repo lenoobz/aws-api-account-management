@@ -1,4 +1,4 @@
-import { PositionEntity } from '../entities/portfolio.entity';
+import { PositionEntity } from '../entities/position.entity';
 
 export interface IPositionRepo {
   isPositionExisted: (accountId: string, createdBy: string, ticker: string) => Promise<boolean>;

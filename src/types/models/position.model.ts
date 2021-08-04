@@ -1,7 +1,7 @@
 import { ObjectId } from 'bson';
-import { PositionEntity } from '../entities/portfolio.entity';
+import { PositionEntity } from '../entities/position.entity';
 
-export type PortfolioModel = {
+export type PositionModel = {
   _id?: ObjectId;
   createdAt?: Date;
   updatedAt?: Date;

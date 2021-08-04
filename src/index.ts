@@ -1,8 +1,8 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyHandlerV2 } from 'aws-lambda';
 import { StatusCodes } from 'http-status-codes';
 import { AccountMongo } from './infra/repositories/mongodb/repos/account.mongo';
-import { PortfolioMongo } from './infra/repositories/mongodb/repos/portfolio.mongo';
-import { ErrorCodes, ErrorMessages } from './types/enums/errorCodes.enum';
+import { PositionMongo } from './infra/repositories/mongodb/repos/position.mongo';
+import { ErrorCodes, ErrorMessages } from './consts/errors.enum';
 import { AccountService } from './usecase/accounts/account.service';
 
 export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEventV2) => {
@@ -15,8 +15,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
   let userId;
 
   const accountMongo = new AccountMongo();
-  const portfolioMongo = new PortfolioMongo();
-  const accountService = new AccountService(accountMongo, portfolioMongo);
+  const positionMongo = new PositionMongo();
+  const accountService = new AccountService(accountMongo, positionMongo);
 
   try {
     switch (event.routeKey) {
@@ -45,6 +45,12 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
         break;
       case 'DELETE /v1/position':
         body = await accountService.deletePosition(JSON.parse(event.body));
+        break;
+      case 'POST /v1/portfolios':
+        break;
+      case 'POST /v1/breakdowns':
+        break;
+      case 'POST /v1/dividends':
         break;
       default:
         throw new Error(`Unsupported route: "${event.routeKey}"`);

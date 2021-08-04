@@ -2,14 +2,14 @@ import { ObjectId } from 'bson';
 import { StatusCodes } from 'http-status-codes';
 import { AppConf } from '../../../../config/app.config';
 import { AppConsts } from '../../../../consts/app.const';
-import { PositionMongoError } from '../../../../errors/PositionMongoError';
-import { PositionEntity } from '../../../../types/entities/portfolio.entity';
-import { ErrorCodes, ErrorMessages } from '../../../../types/enums/errorCodes.enum';
-import { PortfolioModel } from '../../../../types/models/portfolio.model';
-import { IPositionRepo } from '../../../../types/repositories/IPositionRepo';
+import { PositionMongoError } from '../../../../errors/position.error';
+import { PositionEntity } from '../../../../types/entities/position.entity';
+import { ErrorCodes, ErrorMessages } from '../../../../consts/errors.enum';
+import { PositionModel } from '../../../../types/models/position.model';
+import { IPositionRepo } from '../../../../types/repositories/position.repo';
 import { getClientDb } from './mongo.helper';
 
-export class PortfolioMongo implements IPositionRepo {
+export class PositionMongo implements IPositionRepo {
   async isPositionExisted(accountId: string, createdBy: string, ticker: string): Promise<boolean> {
     console.log('check is position existed', accountId);
 
@@ -25,7 +25,7 @@ export class PortfolioMongo implements IPositionRepo {
 
       const db = await getClientDb(AppConf.mongo.dbName);
       const count = await db
-        .collection<PortfolioModel>(colName)
+        .collection<PositionModel>(colName)
         .find({ accountId, createdBy, ticker, deleted: false })
         .project({ _id: 1 })
         .limit(1)
@@ -33,7 +33,7 @@ export class PortfolioMongo implements IPositionRepo {
 
       return count > 0;
     } catch (error) {
-      console.error('check is portfolio existed failed', error.message);
+      console.error('check is position existed failed', error.message);
 
       if (error instanceof PositionMongoError) {
         throw error;
@@ -47,7 +47,7 @@ export class PortfolioMongo implements IPositionRepo {
   }
 
   async searchPositions(query: any, projection?: any, sortBy?: any): Promise<PositionEntity[]> {
-    console.log('search portfolios', query);
+    console.log('search positions', query);
 
     try {
       const colName = AppConf.mongo.colNames[AppConsts.PORTFOLIOS_COLLECTION];
@@ -61,7 +61,7 @@ export class PortfolioMongo implements IPositionRepo {
 
       const db = await getClientDb(AppConf.mongo.dbName);
       const portfolios = await db
-        .collection<PortfolioModel>(colName)
+        .collection<PositionModel>(colName)
         .find({ ...query })
         .project(projection ?? {})
         .sort(sortBy ?? {})
@@ -72,7 +72,7 @@ export class PortfolioMongo implements IPositionRepo {
         return { ...rest };
       });
     } catch (error) {
-      console.error('search accounts failed', error.message);
+      console.error('search positions failed', error.message);
 
       if (error instanceof PositionMongoError) {
         throw error;
@@ -100,14 +100,14 @@ export class PortfolioMongo implements IPositionRepo {
 
       const db = await getClientDb(AppConf.mongo.dbName);
 
-      const newPosition: PortfolioModel = {
+      const newPosition: PositionModel = {
         ...position,
         enabled: true,
         deleted: false,
         createdAt: new Date(),
         updatedAt: new Date()
       };
-      const result = await db.collection<PortfolioModel>(colName).insertOne(newPosition);
+      const result = await db.collection<PositionModel>(colName).insertOne(newPosition);
 
       return position;
     } catch (error) {
@@ -140,12 +140,12 @@ export class PortfolioMongo implements IPositionRepo {
       const db = await getClientDb(AppConf.mongo.dbName);
 
       const { accountId, createdBy, ticker } = position;
-      const updateAccount: PortfolioModel = {
+      const updateAccount: PositionModel = {
         ...position,
         updatedAt: new Date()
       };
       await db
-        .collection<PortfolioModel>(colName)
+        .collection<PositionModel>(colName)
         .updateOne({ accountId, createdBy, ticker, enabled: true }, { $set: updateAccount });
 
       return position;

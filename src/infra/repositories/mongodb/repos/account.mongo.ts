@@ -2,10 +2,10 @@ import { ObjectId } from 'bson';
 import { StatusCodes } from 'http-status-codes';
 import { AppConf } from '../../../../config/app.config';
 import { AppConsts } from '../../../../consts/app.const';
-import { AccountMongoError } from '../../../../errors/AccountMongoError';
+import { AccountMongoError } from '../../../../errors/account.error';
 import { AccountEntity } from '../../../../types/entities/account.entity';
-import { ErrorCodes, ErrorMessages } from '../../../../types/enums/errorCodes.enum';
-import { IAccountRepo } from '../../../../types/repositories/IAccountRepo';
+import { ErrorCodes, ErrorMessages } from '../../../../consts/errors.enum';
+import { IAccountRepo } from '../../../../types/repositories/account.repo';
 import { AccountModel } from '../../../../types/models/account.model';
 import { getClientDb } from './mongo.helper';
 
