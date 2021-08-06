@@ -52,6 +52,9 @@ export class DividendService {
             name: assets[position.ticker].name,
             price: prices[position.ticker].price,
             currency: prices[position.ticker].currency ?? assets[position.ticker].currency,
+            distYield: assets[position.ticker].distYield,
+            distAmount: assets[position.ticker].distAmount,
+            dividendSchedule: assets[position.ticker].dividendSchedule,
             dividends: dividends[position.ticker]
           };
         });

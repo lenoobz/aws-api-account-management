@@ -55,10 +55,12 @@ export class BreakdownService {
           return {
             ticker: position.ticker,
             shares: position.shares,
-            assetClass: assets[position.ticker].assetClass,
             name: assets[position.ticker].name,
             price: prices[position.ticker].price,
             currency: prices[position.ticker].currency ?? assets[position.ticker].currency,
+            allocationCash: assets[position.ticker].allocationCash,
+            allocationBond: assets[position.ticker].allocationBond,
+            allocationStock: assets[position.ticker].allocationStock,
             sectors: sectors[position.ticker],
             countries: countries[position.ticker]
           };

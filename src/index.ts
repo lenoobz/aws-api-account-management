@@ -90,7 +90,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event: APIGatewayProxyEv
         userId = event.pathParameters.userId;
         body = await portfolioService.getPortfoliosByUserId(userId);
         break;
-      case 'GET /v1/breakdown/{userId}':
+      case 'GET /v1/breakdowns/{userId}':
         userId = event.pathParameters.userId;
         body = await breakdownService.getBreakdownByUserId(userId);
         break;
